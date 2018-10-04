@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rogarbage"
+name = "rodumpster"
 version = "0.1.0"
 dependencies = [
  "serde 1.0.79 (registry+https://github.com/rust-lang/crates.io-index)",
