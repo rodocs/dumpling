@@ -116,7 +116,6 @@ fn main() {
     let dump: Dump = serde_json::from_str(DUMP_SOURCE).unwrap();
 
     let mut output = String::new();
-
     emit_dump(&dump, &mut output).unwrap();
 
     println!("{}", output);
