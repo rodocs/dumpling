@@ -76,7 +76,7 @@ struct DumpClassCallback {
 fn emit_dump(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
     writeln!(output, "<html>")?;
-    writeln!(output, "<head><title>RoGarbage</title></head")?;
+    writeln!(output, "<head><title>RoDumpster</title></head")?;
     writeln!(output, "<body>")?;
 
     for class in &dump.classes {
