@@ -1,4 +1,5 @@
-mod dump;
+pub mod dump;
+pub mod supplement;
 
 use std::{
     fmt::{self, Write},
@@ -6,9 +7,12 @@ use std::{
 
 use serde_json;
 
-use crate::dump::{Dump, DumpClass, DumpClassMember};
+use crate::{
+    dump::{Dump, DumpClass, DumpClassMember},
+};
 
 static DUMP_SOURCE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/dump.json"));
+static INSTANCE_SOURCE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/Instance.md"));
 
 fn emit_dump(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
@@ -55,5 +59,13 @@ fn main() {
     let mut output = String::new();
     emit_dump(&dump, &mut output).unwrap();
 
-    println!("{}", output);
+    // println!("{}", output);
+
+    let supplemental = supplement::parse(INSTANCE_SOURCE)
+        .expect("Could not parse supplemental material");
+
+    let encoded = serde_json::to_string(&supplemental)
+        .expect("Could not convert supplemental materal to JSON");
+
+    println!("{}", encoded);
 }
