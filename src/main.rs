@@ -1,77 +1,14 @@
+mod dump;
+
 use std::{
     fmt::{self, Write},
 };
 
-use serde_derive::{Serialize, Deserialize};
 use serde_json;
 
+use crate::dump::{Dump, DumpClass, DumpClassMember};
+
 static DUMP_SOURCE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/dump.json"));
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Dump {
-    #[serde(rename = "Classes")]
-    classes: Vec<DumpClass>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct DumpClass {
-    #[serde(rename = "Name")]
-    name: String,
-
-    #[serde(rename = "Members")]
-    members: Vec<DumpClassMember>,
-
-    #[serde(rename = "Tags", default = "Vec::new")]
-    tags: Vec<String>,
-
-    #[serde(rename = "Superclass")]
-    superclass: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(tag = "MemberType")]
-enum DumpClassMember {
-    Property(DumpClassProperty),
-    Function(DumpClassFunction),
-    Event(DumpClassEvent),
-    Callback(DumpClassCallback),
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct DumpClassProperty {
-    #[serde(rename = "Name")]
-    name: String,
-
-    #[serde(rename = "Tags", default = "Vec::new")]
-    tags: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct DumpClassFunction {
-    #[serde(rename = "Name")]
-    name: String,
-
-    #[serde(rename = "Tags", default = "Vec::new")]
-    tags: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct DumpClassEvent {
-    #[serde(rename = "Name")]
-    name: String,
-
-    #[serde(rename = "Tags", default = "Vec::new")]
-    tags: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct DumpClassCallback {
-    #[serde(rename = "Name")]
-    name: String,
-
-    #[serde(rename = "Tags", default = "Vec::new")]
-    tags: Vec<String>,
-}
 
 fn emit_dump(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
