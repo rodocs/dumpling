@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     fmt::{self, Write},
 };
 
@@ -29,16 +30,19 @@ impl<'a> fmt::Display for HtmlEscape<'a> {
 pub fn tag(name: &str) -> HtmlTag {
     HtmlTag {
         name: name.to_string(),
-        class: None,
         content: Vec::new(),
+        attributes: HashMap::new(),
     }
 }
 
 pub fn tag_class(name: &str, class: &str) -> HtmlTag {
+    let mut attributes = HashMap::new();
+    attributes.insert("class".to_string(), class.to_string());
+
     HtmlTag {
         name: name.to_string(),
-        class: Some(class.to_string()),
         content: Vec::new(),
+        attributes,
     }
 }
 
@@ -64,13 +68,18 @@ impl<T> From<Option<T>> for MaybeHtmlContent where T: Into<HtmlContent> {
 
 pub struct HtmlTag {
     name: String,
-    class: Option<String>,
     content: Vec<HtmlContent>,
+    attributes: HashMap<String, String>,
 }
 
 impl HtmlTag {
-    pub fn with_class(mut self, class: &str) -> HtmlTag {
-        self.class = Some(class.to_string());
+    pub fn attr(mut self, key: &str, value: &str) -> HtmlTag {
+        self.attributes.insert(key.to_string(), value.to_string());
+        self
+    }
+
+    pub fn class(mut self, class: &str) -> HtmlTag {
+        self.attributes.insert("class".to_string(), class.to_string());
         self
     }
 
@@ -125,8 +134,8 @@ impl fmt::Display for HtmlTag {
     fn fmt(&self, output: &mut fmt::Formatter) -> fmt::Result {
         write!(output, "<{}", self.name)?;
 
-        if let Some(class) = &self.class {
-            write!(output, " class=\"{}\"", class)?;
+        for (key, value) in &self.attributes {
+            write!(output, " {}=\"{}\"", key, value)?;
         }
 
         write!(output, ">")?;
