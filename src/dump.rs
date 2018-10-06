@@ -61,6 +61,9 @@ pub struct DumpClassFunction {
     #[serde(rename = "Parameters")]
     pub parameters: Vec<DumpFunctionParameter>,
 
+    #[serde(rename = "ReturnType")]
+    pub return_type: DumpType,
+
     /// Added by Rodumpster
     #[serde(rename = "Description")]
     pub description: Option<String>,

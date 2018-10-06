@@ -1,6 +1,7 @@
 * {
 	font: inherit;
 	box-sizing: inherit;
+	line-height: inherit;
 	margin: 0;
 	padding: 0;
 	border: none;
@@ -10,6 +11,11 @@ html {
 	box-sizing: border-box;
 	font-family: sans-serif;
 	font-size: 16px;
+	line-height: 1.4;
+}
+
+a, a:visited {
+	color: blue;
 }
 
 .dump-classes {

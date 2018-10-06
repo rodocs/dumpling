@@ -33,7 +33,9 @@ pub fn emit_dump(dump: &Dump, output: &mut String) -> fmt::Result {
 
 fn emit_class(class: &DumpClass) -> HtmlTag {
     let mut container = tag_class("div", "dump-class")
-        .child(tag_class("div", "dump-class-title")
+        .child(tag_class("a", "dump-class-title")
+            .attr("id", &class.name)
+            .attr("href", &format!("#{}", class.name))
             .child(&class.name));
 
     if let Some(superclass) = &class.superclass {
@@ -92,11 +94,14 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
 }
 
 fn emit_property(property: &DumpClassProperty) -> HtmlTag {
-    let signature = format!("{}: {}", property.name, property.kind.name);
+    let signature = tag("span")
+        .child(&property.name)
+        .child(": ")
+        .child(emit_type_link(&property.kind.name));
 
     let mut container = tag_class("div", "dump-class-property")
         .child(tag_class("div", "dump-class-property-name")
-            .child(&signature));
+            .child(signature));
 
     if let Some(description) = &property.description {
         container.add_child(tag_class("div", "dump-class-property-description")
@@ -107,16 +112,26 @@ fn emit_property(property: &DumpClassProperty) -> HtmlTag {
 }
 
 fn emit_function(function: &DumpClassFunction) -> HtmlTag {
-    let params = function.parameters.iter()
-        .map(|param| format!("{}: {}", param.name, param.kind.name))
-        .collect::<Vec<_>>()
-        .join(", ");
+    let mut signature = tag("span")
+        .child(&function.name)
+        .child("(");
 
-    let signature = format!("{}({})", function.name, params);
+    for (index, param) in function.parameters.iter().enumerate() {
+        signature.add_child(tag("span").child(&param.name));
+        signature.add_child(": ");
+        signature.add_child(emit_type_link(&param.kind.name));
+
+        if index < function.parameters.len() - 1 {
+            signature.add_child(", ");
+        }
+    }
+
+    signature.add_child("): ");
+    signature.add_child(emit_type_link(&function.return_type.name));
 
     let mut container = tag_class("div", "dump-class-function")
         .child(tag_class("div", "dump-class-function-name")
-            .child(&signature));
+            .child(signature));
 
     if let Some(description) = &function.description {
         container.add_child(tag_class("div", "dump-class-function-description")
@@ -150,4 +165,10 @@ fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
     }
 
     container
+}
+
+fn emit_type_link(name: &str) -> HtmlTag {
+    tag("a")
+        .attr("href", &format!("#{}", name))
+        .child(name)
 }
