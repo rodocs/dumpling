@@ -3,129 +3,142 @@ use std::{
 };
 
 use crate::{
-    dump::{Dump, DumpClass, DumpClassMember, DumpClassProperty, DumpClassFunction},
-    templating::{HtmlEscape, tag},
+    dump::{
+        Dump,
+        DumpClass,
+        DumpClassCallback,
+        DumpClassEvent,
+        DumpClassFunction,
+        DumpClassMember,
+        DumpClassProperty,
+    },
+    templating::{HtmlTag, tag, tag_class},
 };
 
 static STYLE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/miniwiki.css"));
 
 pub fn emit_dump(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
-    writeln!(output, "<html>")?;
 
-    writeln!(output, "{}", tag("head")
-        .append(tag("title").append("Rodumpster"))
-        .append(tag("style").append(STYLE))
-    )?;
-    writeln!(output, "<body>")?;
+    let html = tag("html")
+        .child(tag("head")
+            .child(tag("title").child("Rodumpster"))
+            .child(tag("style").child(STYLE)))
+        .child(tag("body")
+            .child(tag_class("div", "dump-classes")
+                .children(dump.classes.iter().map(emit_class))));
 
-    writeln!(output, r#"<div class="dump-classes">"#)?;
-    for class in &dump.classes {
-        emit_class(class, output)?;
-    }
-    writeln!(output, "</div>")?;
-
-    writeln!(output, "</body>")?;
-    writeln!(output, "</html>")?;
-
-    Ok(())
+    write!(output, "{}", html)
 }
 
-fn emit_class(class: &DumpClass, output: &mut String) -> fmt::Result {
-    writeln!(output, r#"<div class="dump-class">"#)?;
-    writeln!(output, r#"<div class="dump-class-title">{}</div>"#, HtmlEscape(&class.name))?;
+fn emit_class(class: &DumpClass) -> HtmlTag {
+    let mut container = tag_class("div", "dump-class")
+        .child(tag_class("div", "dump-class-title")
+            .child(&class.name));
 
-    match &class.superclass {
-        Some(superclass) => writeln!(output, "<p>Inherits: {}</p>", HtmlEscape(superclass))?,
-        None => {},
+    if let Some(superclass) = &class.superclass {
+        container.add_child(tag("p")
+            .child("Inherits: ")
+            .child(superclass));
     }
 
     if class.tags.len() > 0 {
-        writeln!(output, "<p>Tags: {}</p>", HtmlEscape(&class.tags.join(", ")))?;
+        container.add_child(tag("p")
+            .child("Tags: ")
+            .child(&class.tags.join(", ")));
     }
 
-    match &class.description {
-        Some(description) => writeln!(output, "<p>{}</p>", HtmlEscape(description))?,
-        None =>  {},
+    if let Some(description) = &class.description {
+        container.add_child(tag("p")
+            .child("Tags: ")
+            .child(description));
     }
 
-    let mut properties = Vec::new();
-    let mut functions = Vec::new();
-    let mut events = Vec::new();
-    let mut callbacks = Vec::new();
+    let mut properties = tag_class("div", "dump-class-properties");
+    let mut functions = tag_class("div", "dump-class-functions");
+    let mut events = tag_class("div", "dump-class-events");
+    let mut callbacks = tag_class("div", "dump-class-callbacks");
 
     for member in &class.members {
         match member {
-            DumpClassMember::Property(property) => properties.push(property),
-            DumpClassMember::Function(function) => functions.push(function),
-            DumpClassMember::Event(event) => events.push(event),
-            DumpClassMember::Callback(callback) => callbacks.push(callback),
+            DumpClassMember::Property(property) => properties.add_child(emit_property(property)),
+            DumpClassMember::Function(function) => functions.add_child(emit_function(function)),
+            DumpClassMember::Event(event) => events.add_child(emit_event(event)),
+            DumpClassMember::Callback(callback) => callbacks.add_child(emit_callback(callback)),
         }
     }
 
-    if properties.len() > 0 {
-        writeln!(output, r#"<div class="dump-class-subtitle">Properties</div>"#)?;
-        writeln!(output, r#"<div class="dump-class-properties">"#)?;
-        for property in &properties {
-            emit_property(property, output)?;
-        }
-        writeln!(output, "</div>")?;
+    if properties.child_count() > 0 {
+        container.add_child(tag_class("div", "dump-class-subtitle").child("Properties"));
+        container.add_child(properties);
     }
 
-    if functions.len() > 0 {
-        writeln!(output, r#"<div class="dump-class-subtitle">Functions</div>"#)?;
-        writeln!(output, r#"<div class="dump-class-functions">"#)?;
-        for function in &functions {
-            emit_function(function, output)?;
-        }
-        writeln!(output, "</div>")?;
+    if functions.child_count() > 0 {
+        container.add_child(tag_class("div", "dump-class-subtitle").child("Functions"));
+        container.add_child(functions);
     }
 
-    if events.len() > 0 {
-        writeln!(output, r#"<div class="dump-class-subtitle">Events</div>"#)?;
-        writeln!(output, r#"<div class="dump-class-events">"#)?;
-        for event in &events {
-            // emit_event(event, output)?;
-        }
-        writeln!(output, "</div>")?;
+    if events.child_count() > 0 {
+        container.add_child(tag_class("div", "dump-class-subtitle").child("Events"));
+        container.add_child(events);
     }
 
-    if callbacks.len() > 0 {
-        writeln!(output, r#"<div class="dump-class-subtitle">Callbacks</div>"#)?;
-        writeln!(output, r#"<div class="dump-class-callbacks">"#)?;
-        for callback in &callbacks {
-            // emit_callback(callback, output)?;
-        }
-        writeln!(output, "</div>")?;
+    if callbacks.child_count() > 0 {
+        container.add_child(tag_class("div", "dump-class-subtitle").child("Callbacks"));
+        container.add_child(callbacks);
     }
 
-    writeln!(output, "</div>")?;
-
-    Ok(())
+    container
 }
 
-fn emit_property(property: &DumpClassProperty, output: &mut String) -> fmt::Result {
-    writeln!(output, r#"<div class="dump-class-property">"#)?;
-    writeln!(output, r#"<div class="dump-class-property-name">{}</div>"#, HtmlEscape(&property.name))?;
+fn emit_property(property: &DumpClassProperty) -> HtmlTag {
+    let mut container = tag_class("div", "dump-class-property")
+        .child(tag_class("div", "dump-class-property-name")
+            .child(&property.name));
 
     if let Some(description) = &property.description {
-        writeln!(output, "{}", HtmlEscape(description))?;
+        container.add_child(tag_class("div", "dump-class-property-description")
+            .child(description));
     }
 
-    writeln!(output, "</div>")?;
-
-    Ok(())
+    container
 }
 
-fn emit_function(function: &DumpClassFunction, output: &mut String) -> fmt::Result {
-    writeln!(output, r#"<div class="dump-class-function">"#)?;
-    writeln!(output, r#"<div class="dump-class-function-name">{}</div>"#, HtmlEscape(&function.name))?;
+fn emit_function(function: &DumpClassFunction) -> HtmlTag {
+    let mut container = tag_class("div", "dump-class-function")
+        .child(tag_class("div", "dump-class-function-name")
+            .child(&function.name));
 
     if let Some(description) = &function.description {
-        writeln!(output, "{}", HtmlEscape(description))?;
+        container.add_child(tag_class("div", "dump-class-function-description")
+            .child(description));
     }
 
-    writeln!(output, "</div>")?;
+    container
+}
 
-    Ok(())
+fn emit_event(event: &DumpClassEvent) -> HtmlTag {
+    let mut container = tag_class("div", "dump-class-event")
+        .child(tag_class("div", "dump-class-event-name")
+            .child(&event.name));
+
+    if let Some(description) = &event.description {
+        container.add_child(tag_class("div", "dump-class-event-description")
+            .child(description));
+    }
+
+    container
+}
+
+fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
+    let mut container = tag_class("div", "dump-class-callback")
+        .child(tag_class("div", "dump-class-callback-name")
+            .child(&callback.name));
+
+    if let Some(description) = &callback.description {
+        container.add_child(tag_class("div", "dump-class-callback-description")
+            .child(description));
+    }
+
+    container
 }

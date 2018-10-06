@@ -34,6 +34,34 @@ pub fn tag(name: &str) -> HtmlTag {
     }
 }
 
+pub fn tag_class(name: &str, class: &str) -> HtmlTag {
+    HtmlTag {
+        name: name.to_string(),
+        class: Some(class.to_string()),
+        content: Vec::new(),
+    }
+}
+
+pub enum MaybeHtmlContent {
+    Some(HtmlContent),
+    None,
+}
+
+impl<T> From<T> for MaybeHtmlContent where T: Into<HtmlContent> {
+    fn from(value: T) -> MaybeHtmlContent {
+        MaybeHtmlContent::Some(value.into())
+    }
+}
+
+impl<T> From<Option<T>> for MaybeHtmlContent where T: Into<HtmlContent> {
+    fn from(value: Option<T>) -> MaybeHtmlContent {
+        match value {
+            Some(content) => MaybeHtmlContent::Some(content.into()),
+            None => MaybeHtmlContent::None,
+        }
+    }
+}
+
 pub struct HtmlTag {
     name: String,
     class: Option<String>,
@@ -46,20 +74,50 @@ impl HtmlTag {
         self
     }
 
-    pub fn add_children<T, I>(&mut self, iterator: I) -> &mut HtmlTag
-        where T: Into<HtmlContent>, I: IntoIterator<Item = T>
+    pub fn children<T, I>(mut self, iterator: I) -> HtmlTag
+        where T: Into<MaybeHtmlContent>, I: IntoIterator<Item = T>
     {
         for child in iterator {
-            self.content.push(child.into());
+            match child.into() {
+                MaybeHtmlContent::Some(content) => self.content.push(content),
+                MaybeHtmlContent::None => {},
+            }
         }
         self
     }
 
-    pub fn append<T>(mut self, child: T) -> HtmlTag
-        where T: Into<HtmlContent>
+    pub fn child<T>(mut self, child: T) -> HtmlTag
+        where T: Into<MaybeHtmlContent>
     {
-        self.content.push(child.into());
+        match child.into() {
+            MaybeHtmlContent::Some(content) => self.content.push(content),
+            MaybeHtmlContent::None => {},
+        }
         self
+    }
+
+    pub fn add_child<T>(&mut self, child: T)
+        where T: Into<MaybeHtmlContent>
+    {
+        match child.into() {
+            MaybeHtmlContent::Some(content) => self.content.push(content),
+            MaybeHtmlContent::None => {},
+        }
+    }
+
+    pub fn add_children<T, I>(&mut self, iterator: I)
+        where T: Into<MaybeHtmlContent>, I: IntoIterator<Item = T>
+    {
+        for child in iterator {
+            match child.into() {
+                MaybeHtmlContent::Some(content) => self.content.push(content),
+                MaybeHtmlContent::None => {},
+            }
+        }
+    }
+
+    pub fn child_count(&self) -> usize {
+        self.content.len()
     }
 }
 
@@ -102,6 +160,12 @@ impl fmt::Display for HtmlContent {
 impl<'a> From<&'a str> for HtmlContent {
     fn from(value: &'a str) -> HtmlContent {
         HtmlContent::Text(value.to_string())
+    }
+}
+
+impl<'a> From<&'a String> for HtmlContent {
+    fn from(value: &'a String) -> HtmlContent {
+        HtmlContent::Text(value.clone())
     }
 }
 
