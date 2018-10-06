@@ -105,9 +105,16 @@ fn emit_property(property: &DumpClassProperty) -> HtmlTag {
 }
 
 fn emit_function(function: &DumpClassFunction) -> HtmlTag {
+    let params = function.parameters.iter()
+        .map(|param| format!("{}: {}", param.name, param.kind.name))
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    let signature = format!("{}({})", function.name, params);
+
     let mut container = tag_class("div", "dump-class-function")
         .child(tag_class("div", "dump-class-function-name")
-            .child(&function.name));
+            .child(&signature));
 
     if let Some(description) = &function.description {
         container.add_child(tag_class("div", "dump-class-function-description")

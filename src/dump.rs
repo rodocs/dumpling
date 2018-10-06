@@ -55,6 +55,9 @@ pub struct DumpClassFunction {
     #[serde(rename = "Tags", default = "Vec::new")]
     pub tags: Vec<String>,
 
+    #[serde(rename = "Parameters")]
+    pub parameters: Vec<DumpFunctionParameter>,
+
     /// Added by Rodumpster
     #[serde(rename = "Description")]
     pub description: Option<String>,
@@ -67,6 +70,9 @@ pub struct DumpClassEvent {
 
     #[serde(rename = "Tags", default = "Vec::new")]
     pub tags: Vec<String>,
+
+    #[serde(rename = "Parameters")]
+    pub parameters: Vec<DumpFunctionParameter>,
 
     /// Added by Rodumpster
     #[serde(rename = "Description")]
@@ -84,4 +90,23 @@ pub struct DumpClassCallback {
     /// Added by Rodumpster
     #[serde(rename = "Description")]
     pub description: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DumpFunctionParameter {
+    #[serde(rename = "Name")]
+    pub name: String,
+
+    #[serde(rename = "Type")]
+    pub kind: DumpFunctionParameterType,
+
+    /// Added by Rodumpster
+    #[serde(rename = "Description")]
+    pub description: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DumpFunctionParameterType {
+    #[serde(rename = "Name")]
+    pub name: String,
 }
