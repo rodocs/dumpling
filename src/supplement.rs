@@ -31,13 +31,13 @@ const METADATA_FENCE: &str = "+++";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ItemDescription {
-    metadata: Metadata,
-    prose: String,
+    pub metadata: Metadata,
+    pub prose: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Metadata {
-    target: String,
+    pub target: String,
 }
 
 #[derive(Debug)]

@@ -59,18 +59,22 @@ fn emit_member(member: &DumpClassMember, output: &mut String) -> fmt::Result {
 }
 
 fn main() {
-    let dump: Dump = serde_json::from_str(DUMP_SOURCE).unwrap();
-
-    let mut output = String::new();
-    emit_dump(&dump, &mut output).unwrap();
-
-    // println!("{}", output);
+    let mut dump: Dump = serde_json::from_str(DUMP_SOURCE).unwrap();
 
     let supplemental = supplement::parse(INSTANCE_SOURCE)
         .expect("Could not parse supplemental material");
 
-    let encoded = serde_json::to_string(&supplemental)
-        .expect("Could not convert supplemental materal to JSON");
+    for class in dump.classes.iter_mut() {
+        match supplemental.get(&class.name) {
+            Some(description) => {
+                class.description = Some(description.prose.clone());
+            },
+            None => {},
+        }
+    }
 
-    println!("{}", encoded);
+    let mut output = String::new();
+    emit_dump(&dump, &mut output).unwrap();
+
+    println!("{}", output);
 }
