@@ -52,9 +52,7 @@ impl From<toml::de::Error> for ParseError {
     }
 }
 
-pub fn parse(source: &str) -> Result<HashMap<String, ItemDescription>, ParseError> {
-    let mut result = HashMap::new();
-
+pub fn parse(source: &str, output: &mut HashMap<String, ItemDescription>) -> Result<(), ParseError> {
     let mut fence_locations = source.match_indices(METADATA_FENCE).peekable();
 
     loop {
@@ -73,7 +71,7 @@ pub fn parse(source: &str) -> Result<HashMap<String, ItemDescription>, ParseErro
 
                 let prose = source[(end_index + fence.len())..prose_after_end_index].trim().to_string();
 
-                result.insert(metadata.target.clone(), ItemDescription {
+                output.insert(metadata.target.clone(), ItemDescription {
                     metadata,
                     prose,
                 });
@@ -82,5 +80,5 @@ pub fn parse(source: &str) -> Result<HashMap<String, ItemDescription>, ParseErro
         }
     }
 
-    Ok(result)
+    Ok(())
 }

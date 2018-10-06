@@ -3,8 +3,9 @@ pub mod miniwiki;
 pub mod supplement;
 
 use std::{
-    io,
+    collections::HashMap,
     fs,
+    io,
     path::Path,
 };
 
@@ -32,7 +33,8 @@ fn load_dump(dump_path: &Path, supplemental_path: &Path) -> io::Result<Dump> {
     // TODO: Iterate directory recursively instead
     let supplemental_source = fs::read_to_string(supplemental_path)?;
 
-    let supplemental = supplement::parse(&supplemental_source)
+    let mut supplemental = HashMap::new();
+    supplement::parse(&supplemental_source, &mut supplemental)
         .expect("Could not parse supplemental material");
 
     for class in dump.classes.iter_mut() {
@@ -82,8 +84,8 @@ fn main() {
                 .required(true)
                 .takes_value(true))
 
-            .arg(Arg::with_name("supplement")
-                .long("supplement")
+            .arg(Arg::with_name("supplemental")
+                .long("supplemental")
                 .help("The location of the Roblox supplementary data")
                 .required(true)
                 .takes_value(true)))
@@ -97,8 +99,8 @@ fn main() {
                 .required(true)
                 .takes_value(true))
 
-            .arg(Arg::with_name("supplement")
-                .long("supplement")
+            .arg(Arg::with_name("supplemental")
+                .long("supplemental")
                 .help("The location of the Roblox supplementary data")
                 .required(true)
                 .takes_value(true)))
@@ -109,14 +111,14 @@ fn main() {
         ("miniwiki", command_matches) => {
             let command_matches = command_matches.unwrap();
             let dump_path = Path::new(command_matches.value_of("dump").unwrap());
-            let supplemental_path = Path::new(command_matches.value_of("supplement").unwrap());
+            let supplemental_path = Path::new(command_matches.value_of("supplemental").unwrap());
 
             miniwiki(dump_path, supplemental_path);
         },
         ("megadump", command_matches) => {
             let command_matches = command_matches.unwrap();
             let dump_path = Path::new(command_matches.value_of("dump").unwrap());
-            let supplemental_path = Path::new(command_matches.value_of("supplement").unwrap());
+            let supplemental_path = Path::new(command_matches.value_of("supplemental").unwrap());
 
             megadump(dump_path, supplemental_path);
         },
