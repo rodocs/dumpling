@@ -1,6 +1,7 @@
 pub mod dump;
 pub mod miniwiki;
 pub mod supplement;
+pub mod templating;
 
 use std::{
     collections::HashMap,

@@ -2,41 +2,21 @@ use std::{
     fmt::{self, Write},
 };
 
-use crate::dump::{Dump, DumpClass, DumpClassMember, DumpClassProperty, DumpClassFunction};
+use crate::{
+    dump::{Dump, DumpClass, DumpClassMember, DumpClassProperty, DumpClassFunction},
+    templating::{HtmlEscape, tag},
+};
 
 static STYLE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/miniwiki.css"));
-
-/// Utility to HTML escape a string when using format strings.
-/// Inspired by https://github.com/rust-lang/rust/blob/master/src/librustdoc/html/escape.rs
-/// This functionality should totally become a crate.
-struct HtmlEscape<'a>(&'a str);
-
-impl<'a> fmt::Display for HtmlEscape<'a> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        // This could be more efficient -- copies will happen one character at a
-        // time regardless of escapes.
-        for value in self.0.chars() {
-            match value {
-                '"' => fmt.write_str("&quot;")?,
-                '&' => fmt.write_str("&amp;")?,
-                '\'' => fmt.write_str("&#x27;")?,
-                '<' => fmt.write_str("&lt;")?,
-                '>' => fmt.write_str("&gt;")?,
-                _ => fmt.write_char(value)?,
-            }
-        }
-
-        Ok(())
-    }
-}
 
 pub fn emit_dump(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
     writeln!(output, "<html>")?;
-    writeln!(output, "<head>")?;
-    writeln!(output, "<title>RoDumpster</title>")?;
-    writeln!(output, "<style>{}</style>", HtmlEscape(STYLE));
-    writeln!(output, "</head>")?;
+
+    writeln!(output, "{}", tag("head")
+        .append(tag("title").append("Rodumpster"))
+        .append(tag("style").append(STYLE))
+    )?;
     writeln!(output, "<body>")?;
 
     writeln!(output, r#"<div class="dump-classes">"#)?;
@@ -80,7 +60,6 @@ fn emit_class(class: &DumpClass, output: &mut String) -> fmt::Result {
             DumpClassMember::Function(function) => functions.push(function),
             DumpClassMember::Event(event) => events.push(event),
             DumpClassMember::Callback(callback) => callbacks.push(callback),
-            _ => {},
         }
     }
 
