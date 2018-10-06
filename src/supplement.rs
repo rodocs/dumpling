@@ -20,6 +20,8 @@
 //! A handy name to refer to the `Instance` with.
 //! ```
 
+use std::collections::HashMap;
+
 use toml;
 use serde_derive::{Serialize, Deserialize};
 
@@ -50,8 +52,8 @@ impl From<toml::de::Error> for ParseError {
     }
 }
 
-pub fn parse(source: &str) -> Result<Vec<ItemDescription>, ParseError> {
-    let mut result = Vec::new();
+pub fn parse(source: &str) -> Result<HashMap<String, ItemDescription>, ParseError> {
+    let mut result = HashMap::new();
 
     let mut fence_locations = source.match_indices(METADATA_FENCE).peekable();
 
@@ -62,7 +64,7 @@ pub fn parse(source: &str) -> Result<Vec<ItemDescription>, ParseError> {
                     .ok_or(ParseError::UnclosedMetadataBlock)?;
 
                 let metadata_source = &source[(start_index + fence.len())..end_index].trim();
-                let metadata = toml::from_str(metadata_source)?;
+                let metadata: Metadata = toml::from_str(metadata_source)?;
 
                 let prose_after_end_index = match fence_locations.peek() {
                     Some((index, _)) => *index,
@@ -71,7 +73,7 @@ pub fn parse(source: &str) -> Result<Vec<ItemDescription>, ParseError> {
 
                 let prose = source[(end_index + fence.len())..prose_after_end_index].trim().to_string();
 
-                result.push(ItemDescription {
+                result.insert(metadata.target.clone(), ItemDescription {
                     metadata,
                     prose,
                 });

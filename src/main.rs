@@ -40,6 +40,11 @@ fn emit_class(class: &DumpClass, output: &mut String) -> fmt::Result {
         writeln!(output, "<p>Tags: {}</p>", class.tags.join(", "))?;
     }
 
+    match &class.description {
+        Some(description) => writeln!(output, "<p>{}</p>", description)?,
+        None =>  {},
+    }
+
     writeln!(output, "<ul>")?;
 
     for member in &class.members {

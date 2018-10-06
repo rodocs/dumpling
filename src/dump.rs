@@ -19,6 +19,10 @@ pub struct DumpClass {
 
     #[serde(rename = "Superclass")]
     pub superclass: Option<String>,
+
+    /// Added by Rodumpster
+    #[serde(rename = "Description")]
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,6 +41,10 @@ pub struct DumpClassProperty {
 
     #[serde(rename = "Tags", default = "Vec::new")]
     pub tags: Vec<String>,
+
+    /// Added by Rodumpster
+    #[serde(rename = "Description")]
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -46,6 +54,10 @@ pub struct DumpClassFunction {
 
     #[serde(rename = "Tags", default = "Vec::new")]
     pub tags: Vec<String>,
+
+    /// Added by Rodumpster
+    #[serde(rename = "Description")]
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -55,6 +67,10 @@ pub struct DumpClassEvent {
 
     #[serde(rename = "Tags", default = "Vec::new")]
     pub tags: Vec<String>,
+
+    /// Added by Rodumpster
+    #[serde(rename = "Description")]
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -64,4 +80,8 @@ pub struct DumpClassCallback {
 
     #[serde(rename = "Tags", default = "Vec::new")]
     pub tags: Vec<String>,
+
+    /// Added by Rodumpster
+    #[serde(rename = "Description")]
+    pub description: Option<String>,
 }
