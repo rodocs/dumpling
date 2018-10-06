@@ -1,67 +1,38 @@
 pub mod dump;
+pub mod miniwiki;
 pub mod supplement;
 
 use std::{
-    fmt::{self, Write},
+    io,
+    fs,
+    path::Path,
 };
 
 use serde_json;
 
-use crate::{
-    dump::{Dump, DumpClass, DumpClassMember},
+use clap::{
+    App,
+    SubCommand,
+    Arg,
 };
 
-static DUMP_SOURCE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/dump.json"));
-static INSTANCE_SOURCE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/Instance.md"));
+use crate::{
+    dump::Dump,
+};
 
-fn emit_dump(dump: &Dump, output: &mut String) -> fmt::Result {
-    writeln!(output, "<!doctype html>")?;
-    writeln!(output, "<html>")?;
-    writeln!(output, "<head><title>RoDumpster</title></head")?;
-    writeln!(output, "<body>")?;
+// static INSTANCE_SOURCE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/Instance.md"));
 
-    for class in &dump.classes {
-        emit_class(class, output)?;
-    }
+fn load_dump(dump_path: &Path, supplemental_path: &Path) -> io::Result<Dump> {
+    let dump_source = fs::read_to_string(dump_path)?;
 
-    writeln!(output, "</body>")?;
-    writeln!(output, "</html>")
-}
+    // TODO: Handle JSON errors gracefully
+    let mut dump: Dump = serde_json::from_str(&dump_source)
+        .expect("Could not parse dump file");
 
-fn emit_class(class: &DumpClass, output: &mut String) -> fmt::Result {
-    writeln!(output, "<h1>{}</h1>", class.name)?;
+    // TODO: Iterate directory recursively instead
+    let supplemental_source = fs::read_to_string(supplemental_path)?;
 
-    match &class.superclass {
-        Some(superclass) => writeln!(output, "<p>Inherits: {}</p>", superclass)?,
-        None => {},
-    }
-
-    if class.tags.len() > 0 {
-        writeln!(output, "<p>Tags: {}</p>", class.tags.join(", "))?;
-    }
-
-    match &class.description {
-        Some(description) => writeln!(output, "<p>{}</p>", description)?,
-        None =>  {},
-    }
-
-    writeln!(output, "<ul>")?;
-
-    for member in &class.members {
-        emit_member(member, output)?
-    }
-
-    writeln!(output, "</ul>")
-}
-
-fn emit_member(member: &DumpClassMember, output: &mut String) -> fmt::Result {
-    writeln!(output, "<li>{:?}</li>", member)
-}
-
-fn main() {
-    let mut dump: Dump = serde_json::from_str(DUMP_SOURCE).unwrap();
-
-    let supplemental = supplement::parse(INSTANCE_SOURCE)
+    let supplemental = supplement::parse(&supplemental_source)
         .expect("Could not parse supplemental material");
 
     for class in dump.classes.iter_mut() {
@@ -73,8 +44,82 @@ fn main() {
         }
     }
 
+    Ok(dump)
+}
+
+fn miniwiki(dump_path: &Path, supplemental_path: &Path) {
+    let dump = load_dump(dump_path, supplemental_path)
+        .expect("Could not load dump");
+
     let mut output = String::new();
-    emit_dump(&dump, &mut output).unwrap();
+    miniwiki::emit_dump(&dump, &mut output).unwrap();
 
     println!("{}", output);
+}
+
+fn megadump(dump_path: &Path, supplemental_path: &Path) {
+    let dump = load_dump(dump_path, supplemental_path)
+        .expect("Could not load dump");
+
+    let output = serde_json::to_string(&dump)
+        .expect("Could not convert dump to JSON");
+
+    println!("{}", output);
+}
+
+fn main() {
+    let matches = App::new("Rodumpster")
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+
+        .subcommand(SubCommand::with_name("miniwiki")
+            .about("Generate a simple, single-page mini Roblox wiki")
+
+            .arg(Arg::with_name("dump")
+                .long("dump")
+                .help("The location of the Roblox JSON API dump")
+                .required(true)
+                .takes_value(true))
+
+            .arg(Arg::with_name("supplement")
+                .long("supplement")
+                .help("The location of the Roblox supplementary data")
+                .required(true)
+                .takes_value(true)))
+
+        .subcommand(SubCommand::with_name("megadump")
+            .about("Create an API dump file with additional data")
+
+            .arg(Arg::with_name("dump")
+                .long("dump")
+                .help("The location of the Roblox JSON API dump")
+                .required(true)
+                .takes_value(true))
+
+            .arg(Arg::with_name("supplement")
+                .long("supplement")
+                .help("The location of the Roblox supplementary data")
+                .required(true)
+                .takes_value(true)))
+
+        .get_matches();
+
+    match matches.subcommand() {
+        ("miniwiki", command_matches) => {
+            let command_matches = command_matches.unwrap();
+            let dump_path = Path::new(command_matches.value_of("dump").unwrap());
+            let supplemental_path = Path::new(command_matches.value_of("supplement").unwrap());
+
+            miniwiki(dump_path, supplemental_path);
+        },
+        ("megadump", command_matches) => {
+            let command_matches = command_matches.unwrap();
+            let dump_path = Path::new(command_matches.value_of("dump").unwrap());
+            let supplemental_path = Path::new(command_matches.value_of("supplement").unwrap());
+
+            megadump(dump_path, supplemental_path);
+        },
+        _ => println!("{}", matches.usage()),
+    }
 }

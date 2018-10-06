@@ -1,4 +1,4 @@
-# RoDumpster
+# Rodumpster
 Roblox Wiki-style data aggregation/source with no frontend.
 
 ## Goals
