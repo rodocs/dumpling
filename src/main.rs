@@ -30,12 +30,21 @@ fn load_dump(dump_path: &Path, supplemental_path: &Path) -> io::Result<Dump> {
     let mut dump: Dump = serde_json::from_str(&dump_source)
         .expect("Could not parse dump file");
 
-    // TODO: Iterate directory recursively instead
-    let supplemental_source = fs::read_to_string(supplemental_path)?;
-
     let mut supplemental = HashMap::new();
-    supplement::parse(&supplemental_source, &mut supplemental)
-        .expect("Could not parse supplemental material");
+
+    for entry in fs::read_dir(supplemental_path)? {
+        let entry = entry?;
+        let entry_path = entry.path();
+        let metadata = fs::metadata(&entry_path)?;
+
+        // TODO: Recursive, probably
+        if metadata.is_file() {
+            let entry_source = fs::read_to_string(entry_path)?;
+
+            supplement::parse(&entry_source, &mut supplemental)
+                .expect("Could not parse supplemental material");
+        }
+    }
 
     for class in dump.classes.iter_mut() {
         match supplemental.get(&class.name) {
