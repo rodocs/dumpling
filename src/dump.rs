@@ -42,6 +42,9 @@ pub struct DumpClassProperty {
     #[serde(rename = "Tags", default = "Vec::new")]
     pub tags: Vec<String>,
 
+    #[serde(rename = "ValueType")]
+    pub kind: DumpType,
+
     /// Added by Rodumpster
     #[serde(rename = "Description")]
     pub description: Option<String>,
@@ -98,7 +101,7 @@ pub struct DumpFunctionParameter {
     pub name: String,
 
     #[serde(rename = "Type")]
-    pub kind: DumpFunctionParameterType,
+    pub kind: DumpType,
 
     /// Added by Rodumpster
     #[serde(rename = "Description")]
@@ -106,7 +109,7 @@ pub struct DumpFunctionParameter {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct DumpFunctionParameterType {
+pub struct DumpType {
     #[serde(rename = "Name")]
     pub name: String,
 }

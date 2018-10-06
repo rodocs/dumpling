@@ -92,9 +92,11 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
 }
 
 fn emit_property(property: &DumpClassProperty) -> HtmlTag {
+    let signature = format!("{}: {}", property.name, property.kind.name);
+
     let mut container = tag_class("div", "dump-class-property")
         .child(tag_class("div", "dump-class-property-name")
-            .child(&property.name));
+            .child(&signature));
 
     if let Some(description) = &property.description {
         container.add_child(tag_class("div", "dump-class-property-description")
