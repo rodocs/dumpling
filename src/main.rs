@@ -79,6 +79,18 @@ fn megadump(dump_path: &Path, supplemental_path: &Path) {
 }
 
 fn main() {
+    let dump_arg = Arg::with_name("dump")
+        .long("dump")
+        .help("The location of the Roblox JSON API dump")
+        .required(true)
+        .takes_value(true);
+
+    let supplemental_arg = Arg::with_name("supplemental")
+        .long("supplemental")
+        .help("The location of the Roblox supplementary data")
+        .required(true)
+        .takes_value(true);
+
     let matches = App::new("Rodumpster")
         .author(env!("CARGO_PKG_AUTHORS"))
         .version(env!("CARGO_PKG_VERSION"))
@@ -86,33 +98,13 @@ fn main() {
 
         .subcommand(SubCommand::with_name("miniwiki")
             .about("Generate a simple, single-page mini Roblox wiki")
-
-            .arg(Arg::with_name("dump")
-                .long("dump")
-                .help("The location of the Roblox JSON API dump")
-                .required(true)
-                .takes_value(true))
-
-            .arg(Arg::with_name("supplemental")
-                .long("supplemental")
-                .help("The location of the Roblox supplementary data")
-                .required(true)
-                .takes_value(true)))
+            .arg(dump_arg.clone())
+            .arg(supplemental_arg.clone()))
 
         .subcommand(SubCommand::with_name("megadump")
             .about("Create an API dump file with additional data")
-
-            .arg(Arg::with_name("dump")
-                .long("dump")
-                .help("The location of the Roblox JSON API dump")
-                .required(true)
-                .takes_value(true))
-
-            .arg(Arg::with_name("supplemental")
-                .long("supplemental")
-                .help("The location of the Roblox supplementary data")
-                .required(true)
-                .takes_value(true)))
+            .arg(dump_arg.clone())
+            .arg(supplemental_arg.clone()))
 
         .get_matches();
 
