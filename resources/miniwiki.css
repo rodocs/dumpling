@@ -1,0 +1,34 @@
+* {
+	font: inherit;
+	box-sizing: inherit;
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+html {
+	box-sizing: border-box;
+	font-family: sans-serif;
+	font-size: 16px;
+}
+
+.dump-classes {
+	max-width: 64rem;
+	margin: 0 auto;
+}
+
+.dump-class {
+	background-color: #eee;
+	padding: 0.5rem;
+	margin: 0.5rem;
+}
+
+.dump-class-title {
+	font-size: 2rem;
+	font-weight: bold;
+}
+
+.dump-class-subtitle {
+	font-size: 1.5rem;
+	font-weight: bold;
+}
