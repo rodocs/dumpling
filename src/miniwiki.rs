@@ -2,7 +2,7 @@ use std::{
     fmt::{self, Write},
 };
 
-use crate::{
+use ::{
     dump::{
         Dump,
         DumpClass,
@@ -22,7 +22,7 @@ pub fn emit_dump(dump: &Dump, output: &mut String) -> fmt::Result {
 
     let html = tag("html")
         .child(tag("head")
-            .child(tag("title").child("Rodumpster"))
+            .child(tag("title").child("Dumpling"))
             .child(tag("style").child(STYLE)))
         .child(tag("body")
             .child(tag_class("div", "dump-classes")

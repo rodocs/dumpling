@@ -23,7 +23,6 @@
 use std::collections::HashMap;
 
 use toml;
-use serde_derive::{Serialize, Deserialize};
 
 // This is inspired by Hugo's TOML front-matter indicator
 // --- is used for YAML, and +++ is used to disambiguate for TOML.

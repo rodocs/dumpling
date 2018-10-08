@@ -1,5 +1,3 @@
-use serde_derive::{Serialize, Deserialize};
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Dump {
     #[serde(rename = "Classes")]
@@ -20,7 +18,7 @@ pub struct DumpClass {
     #[serde(rename = "Superclass")]
     pub superclass: Option<String>,
 
-    /// Added by Rodumpster
+    /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
 }
@@ -45,7 +43,7 @@ pub struct DumpClassProperty {
     #[serde(rename = "ValueType")]
     pub kind: DumpType,
 
-    /// Added by Rodumpster
+    /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
 }
@@ -64,7 +62,7 @@ pub struct DumpClassFunction {
     #[serde(rename = "ReturnType")]
     pub return_type: DumpType,
 
-    /// Added by Rodumpster
+    /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
 }
@@ -80,7 +78,7 @@ pub struct DumpClassEvent {
     #[serde(rename = "Parameters")]
     pub parameters: Vec<DumpFunctionParameter>,
 
-    /// Added by Rodumpster
+    /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
 }
@@ -93,7 +91,7 @@ pub struct DumpClassCallback {
     #[serde(rename = "Tags", default = "Vec::new")]
     pub tags: Vec<String>,
 
-    /// Added by Rodumpster
+    /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
 }
@@ -106,7 +104,7 @@ pub struct DumpFunctionParameter {
     #[serde(rename = "Type")]
     pub kind: DumpType,
 
-    /// Added by Rodumpster
+    /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
 }

@@ -1,3 +1,6 @@
+//! This is a set of pretty horrible hacks and experiments to invent a
+//! templating language for HTML in Rust.
+
 use std::{
     collections::HashMap,
     fmt::{self, Write},

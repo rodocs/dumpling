@@ -1,3 +1,10 @@
+#[macro_use] extern crate serde_derive;
+
+extern crate serde;
+extern crate serde_json;
+extern crate toml;
+extern crate clap;
+
 pub mod dump;
 pub mod miniwiki;
 pub mod supplement;
@@ -10,15 +17,13 @@ use std::{
     path::Path,
 };
 
-use serde_json;
-
 use clap::{
     App,
     SubCommand,
     Arg,
 };
 
-use crate::{
+use ::{
     dump::Dump,
 };
 
