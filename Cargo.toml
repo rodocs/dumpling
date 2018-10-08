@@ -1,5 +1,5 @@
 [package]
-name = "landfill"
+name = "dumpling"
 version = "0.1.0"
 authors = ["lgreathouse <me@lpghatguy.com>"]
 
@@ -9,3 +9,4 @@ serde_derive = "1.0"
 serde_json = "1.0"
 toml = "0.4"
 clap = "2.32"
+pulldown-cmark = { version = "0.1.2", default-features = false }
