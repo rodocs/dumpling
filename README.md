@@ -34,7 +34,7 @@ cargo run -- miniwiki --dump dump.json --supplemental supplemental > miniwiki.ht
 ```
 
 ## Requirements
-* Rust 1.30+ (currently beta)
+* Rust 1.29+
 
 ## License
 Dumpling is available under the terms of the Mozilla Public License, Version 2.0. See [LICENSE](LICENSE) for details.
