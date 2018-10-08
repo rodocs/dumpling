@@ -155,6 +155,7 @@ impl fmt::Display for HtmlTag {
 
 pub enum HtmlContent {
     Text(String),
+    Raw(String),
     Tag(HtmlTag),
 }
 
@@ -162,6 +163,7 @@ impl fmt::Display for HtmlContent {
     fn fmt(&self, output: &mut fmt::Formatter) -> fmt::Result {
         match self {
             HtmlContent::Text(text) => write!(output, "{}", HtmlEscape(text))?,
+            HtmlContent::Raw(markup) => write!(output, "{}", markup)?,
             HtmlContent::Tag(tag) => write!(output, "{}", tag)?,
         }
 

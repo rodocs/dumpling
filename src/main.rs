@@ -4,6 +4,7 @@ extern crate serde;
 extern crate serde_json;
 extern crate toml;
 extern crate clap;
+extern crate pulldown_cmark;
 
 pub mod dump;
 pub mod miniwiki;

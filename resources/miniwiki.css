@@ -38,3 +38,26 @@ a, a:visited {
 	font-size: 1.5rem;
 	font-weight: bold;
 }
+
+.markdown h1 {
+	font-size: 2rem;
+	font-weight: bold;
+}
+
+.markdown h2 {
+	font-size: 1.6rem;
+	font-weight: bold;
+}
+
+.markdown h3 {
+	font-size: 1.3rem;
+	font-weight: bold;
+}
+
+.markdown strong {
+	font-weight: bold;
+}
+
+.markdown em {
+	font-style: italic;
+}

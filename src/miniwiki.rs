@@ -2,6 +2,8 @@ use std::{
     fmt::{self, Write},
 };
 
+use pulldown_cmark;
+
 use ::{
     dump::{
         Dump,
@@ -12,7 +14,7 @@ use ::{
         DumpClassMember,
         DumpClassProperty,
     },
-    templating::{HtmlTag, tag, tag_class},
+    templating::{HtmlTag, HtmlContent, tag, tag_class},
 };
 
 static STYLE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/miniwiki.css"));
@@ -41,7 +43,7 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
     if let Some(superclass) = &class.superclass {
         container.add_child(tag("p")
             .child("Inherits: ")
-            .child(superclass));
+            .child(emit_type_link(superclass)));
     }
 
     if class.tags.len() > 0 {
@@ -51,9 +53,12 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
     }
 
     if let Some(description) = &class.description {
-        container.add_child(tag("p")
-            .child("Tags: ")
-            .child(description));
+        let mut html_description = String::new();
+        let parser = pulldown_cmark::Parser::new(description);
+        pulldown_cmark::html::push_html(&mut html_description, parser);
+
+        container.add_child(tag_class("div", "markdown")
+            .child(HtmlContent::Raw(html_description)));
     }
 
     let mut properties = tag_class("div", "dump-class-properties");
