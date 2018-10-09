@@ -19,7 +19,7 @@ use ::{
 
 static STYLE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/miniwiki.css"));
 
-pub fn emit_dump(dump: &Dump, output: &mut String) -> fmt::Result {
+pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
 
     let html = tag("html")

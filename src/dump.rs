@@ -1,7 +1,43 @@
+use std::{
+    fs,
+    io,
+    path::Path,
+};
+
+use serde_json;
+
+#[derive(Debug)]
+pub enum DumpReadError {
+    InvalidJson(serde_json::Error),
+    IoError(io::Error),
+}
+
+impl From<serde_json::Error> for DumpReadError {
+    fn from(error: serde_json::Error) -> DumpReadError {
+        DumpReadError::InvalidJson(error)
+    }
+}
+
+impl From<io::Error> for DumpReadError {
+    fn from(error: io::Error) -> DumpReadError {
+        DumpReadError::IoError(error)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Dump {
     #[serde(rename = "Classes")]
     pub classes: Vec<DumpClass>,
+}
+
+impl Dump {
+    pub fn read_from_file(path: &Path) -> Result<Dump, DumpReadError> {
+        let contents = fs::read_to_string(path)?;
+
+        let dump: Dump = serde_json::from_str(&contents)?;
+
+        Ok(dump)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

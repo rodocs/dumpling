@@ -20,7 +20,12 @@
 //! A handy name to refer to the `Instance` with.
 //! ```
 
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fs,
+    io,
+    path::Path,
+};
 
 use toml;
 
@@ -37,6 +42,56 @@ pub struct ItemDescription {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Metadata {
     pub target: String,
+}
+
+#[derive(Debug)]
+pub enum ReadError {
+    IoError(io::Error),
+    ParseError(ParseError),
+}
+
+impl From<io::Error> for ReadError {
+    fn from(error: io::Error) -> ReadError {
+        ReadError::IoError(error)
+    }
+}
+
+impl From<ParseError> for ReadError {
+    fn from(error: ParseError) -> ReadError {
+        ReadError::ParseError(error)
+    }
+}
+
+fn read_all_internal(path: &Path, output: &mut HashMap<String, ItemDescription>) -> Result<(), ReadError> {
+    let metadata = fs::metadata(path)?;
+
+    if metadata.is_file() {
+        let contents = fs::read_to_string(path)?;
+        parse(&contents, output)?;
+
+        Ok(())
+    } else if metadata.is_dir() {
+        for entry in fs::read_dir(path)? {
+            let entry = entry?;
+            let entry_path = entry.path();
+
+            read_all_internal(&entry_path, output)?;
+        }
+
+        Ok(())
+    } else {
+        unimplemented!();
+    }
+}
+
+/// Recurisively loads all supplemental Markdown files from an input file or
+/// folder.
+pub fn read_all(path: &Path) -> Result<HashMap<String, ItemDescription>, ReadError> {
+    let mut result = HashMap::new();
+
+    read_all_internal(path, &mut result)?;
+
+    Ok(result)
 }
 
 #[derive(Debug)]

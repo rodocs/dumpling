@@ -1,22 +1,19 @@
 #[macro_use] extern crate serde_derive;
 
+extern crate clap;
+extern crate pulldown_cmark;
+extern crate quick_xml;
 extern crate serde;
 extern crate serde_json;
 extern crate toml;
-extern crate clap;
-extern crate pulldown_cmark;
 
 pub mod dump;
 pub mod miniwiki;
 pub mod supplement;
 pub mod templating;
+pub mod reflection_metadata;
 
-use std::{
-    collections::HashMap,
-    fs,
-    io,
-    path::Path,
-};
+use std::path::Path;
 
 use clap::{
     App,
@@ -28,30 +25,12 @@ use ::{
     dump::Dump,
 };
 
-// static INSTANCE_SOURCE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/Instance.md"));
+fn load_dump(dump_path: &Path, supplemental_path: &Path) -> Dump {
+    let mut dump = Dump::read_from_file(dump_path)
+        .expect("Could not load JSON API dump");
 
-fn load_dump(dump_path: &Path, supplemental_path: &Path) -> io::Result<Dump> {
-    let dump_source = fs::read_to_string(dump_path)?;
-
-    // TODO: Handle JSON errors gracefully
-    let mut dump: Dump = serde_json::from_str(&dump_source)
-        .expect("Could not parse dump file");
-
-    let mut supplemental = HashMap::new();
-
-    for entry in fs::read_dir(supplemental_path)? {
-        let entry = entry?;
-        let entry_path = entry.path();
-        let metadata = fs::metadata(&entry_path)?;
-
-        // TODO: Recursive, probably
-        if metadata.is_file() {
-            let entry_source = fs::read_to_string(entry_path)?;
-
-            supplement::parse(&entry_source, &mut supplemental)
-                .expect("Could not parse supplemental material");
-        }
-    }
+    let supplemental = supplement::read_all(supplemental_path)
+        .expect("Could not load supplemental data");
 
     for class in dump.classes.iter_mut() {
         match supplemental.get(&class.name) {
@@ -62,22 +41,20 @@ fn load_dump(dump_path: &Path, supplemental_path: &Path) -> io::Result<Dump> {
         }
     }
 
-    Ok(dump)
+    dump
 }
 
 fn miniwiki(dump_path: &Path, supplemental_path: &Path) {
-    let dump = load_dump(dump_path, supplemental_path)
-        .expect("Could not load dump");
+    let dump = load_dump(dump_path, supplemental_path);
 
     let mut output = String::new();
-    miniwiki::emit_dump(&dump, &mut output).unwrap();
+    miniwiki::emit_wiki(&dump, &mut output).unwrap();
 
     println!("{}", output);
 }
 
 fn megadump(dump_path: &Path, supplemental_path: &Path) {
-    let dump = load_dump(dump_path, supplemental_path)
-        .expect("Could not load dump");
+    let dump = load_dump(dump_path, supplemental_path);
 
     let output = serde_json::to_string(&dump)
         .expect("Could not convert dump to JSON");
