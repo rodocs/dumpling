@@ -33,13 +33,30 @@ use toml;
 // --- is used for YAML, and +++ is used to disambiguate for TOML.
 const METADATA_FENCE: &str = "+++";
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
+pub struct SupplementalData {
+    pub item_descriptions: HashMap<String, ItemDescription>,
+}
+
+impl SupplementalData {
+    pub fn read_from_path(path: &Path) -> Result<SupplementalData, ReadError> {
+        let mut item_descriptions = HashMap::new();
+
+        read_item_descriptions_from_path(path, &mut item_descriptions)?;
+
+        Ok(SupplementalData {
+            item_descriptions,
+        })
+    }
+}
+
+#[derive(Debug)]
 pub struct ItemDescription {
     pub metadata: Metadata,
     pub prose: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Metadata {
     pub target: String,
 }
@@ -62,12 +79,12 @@ impl From<ParseError> for ReadError {
     }
 }
 
-fn read_all_internal(path: &Path, output: &mut HashMap<String, ItemDescription>) -> Result<(), ReadError> {
+fn read_item_descriptions_from_path(path: &Path, output: &mut HashMap<String, ItemDescription>) -> Result<(), ReadError> {
     let metadata = fs::metadata(path)?;
 
     if metadata.is_file() {
         let contents = fs::read_to_string(path)?;
-        parse(&contents, output)?;
+        parse_item_descriptions(&contents, output)?;
 
         Ok(())
     } else if metadata.is_dir() {
@@ -75,23 +92,13 @@ fn read_all_internal(path: &Path, output: &mut HashMap<String, ItemDescription>)
             let entry = entry?;
             let entry_path = entry.path();
 
-            read_all_internal(&entry_path, output)?;
+            read_item_descriptions_from_path(&entry_path, output)?;
         }
 
         Ok(())
     } else {
         unimplemented!();
     }
-}
-
-/// Recurisively loads all supplemental Markdown files from an input file or
-/// folder.
-pub fn read_all(path: &Path) -> Result<HashMap<String, ItemDescription>, ReadError> {
-    let mut result = HashMap::new();
-
-    read_all_internal(path, &mut result)?;
-
-    Ok(result)
 }
 
 #[derive(Debug)]
@@ -106,7 +113,7 @@ impl From<toml::de::Error> for ParseError {
     }
 }
 
-pub fn parse(source: &str, output: &mut HashMap<String, ItemDescription>) -> Result<(), ParseError> {
+fn parse_item_descriptions(source: &str, output: &mut HashMap<String, ItemDescription>) -> Result<(), ParseError> {
     let mut fence_locations = source.match_indices(METADATA_FENCE).peekable();
 
     loop {

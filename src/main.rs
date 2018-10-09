@@ -23,17 +23,18 @@ use clap::{
 
 use ::{
     dump::Dump,
+    supplement::SupplementalData,
 };
 
-fn load_dump(dump_path: &Path, supplemental_path: &Path) -> Dump {
+fn load_combined_dump(dump_path: &Path, supplemental_path: &Path) -> Dump {
     let mut dump = Dump::read_from_file(dump_path)
         .expect("Could not load JSON API dump");
 
-    let supplemental = supplement::read_all(supplemental_path)
+    let supplemental = SupplementalData::read_from_path(supplemental_path)
         .expect("Could not load supplemental data");
 
     for class in dump.classes.iter_mut() {
-        match supplemental.get(&class.name) {
+        match supplemental.item_descriptions.get(&class.name) {
             Some(description) => {
                 class.description = Some(description.prose.clone());
             },
@@ -45,7 +46,7 @@ fn load_dump(dump_path: &Path, supplemental_path: &Path) -> Dump {
 }
 
 fn miniwiki(dump_path: &Path, supplemental_path: &Path) {
-    let dump = load_dump(dump_path, supplemental_path);
+    let dump = load_combined_dump(dump_path, supplemental_path);
 
     let mut output = String::new();
     miniwiki::emit_wiki(&dump, &mut output).unwrap();
@@ -54,7 +55,7 @@ fn miniwiki(dump_path: &Path, supplemental_path: &Path) {
 }
 
 fn megadump(dump_path: &Path, supplemental_path: &Path) {
-    let dump = load_dump(dump_path, supplemental_path);
+    let dump = load_combined_dump(dump_path, supplemental_path);
 
     let output = serde_json::to_string(&dump)
         .expect("Could not convert dump to JSON");
@@ -107,6 +108,6 @@ fn main() {
 
             megadump(dump_path, supplemental_path);
         },
-        _ => println!("{}", matches.usage()),
+        _ => eprintln!("{}", matches.usage()),
     }
 }
