@@ -11,26 +11,30 @@ Dumpling is a tool to combine Roblox's JSON API dump with user-authored descript
 ## Usage
 Dumpling has two modes to demonstrate its functionality: Megadump, and Miniwiki.
 
-Dumpling needs access to the Roblox JSON API dump, which can be produced via a Roblox Studio binary:
+Dumpling needs access to:
+
+The Roblox JSON API dump, which can be produced via a Roblox Studio binary:
 
 ```sh
 RobloxStudioBeta.exe -API dump.json
 ```
 
-Dumpling also needs access to a 'supplemental content' directory. This repository includes one, located in the `supplemental` directory.
+Roblox's `ReflectionMetadata.xml`, which can be pulled out of a Roblox installation
+
+A 'supplemental content' directory. This repository includes one, located in the `supplemental` directory.
 
 ### Megadump
 Megadump generates a JSON API dump with extra information attached. You can use this as the foundation for your own API reference or other tools that want to consume API information.
 
 ```sh
-cargo run -- megadump --dump dump.json --supplemental supplemental > megadump.json
+cargo run -- megadump --dump dump.json --metadata ReflectionMetadata.xml --supplemental supplemental > megadump.json
 ```
 
 ### Miniwiki
 Miniwiki generates a single page, offline-capable, miniature API reference. It's intended as an example of the information contained in Dumpling.
 
 ```sh
-cargo run -- miniwiki --dump dump.json --supplemental supplemental > miniwiki.html
+cargo run -- miniwiki --dump dump.json --metadata ReflectionMetadata.xml --supplemental supplemental > miniwiki.html
 ```
 
 ## Requirements

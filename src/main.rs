@@ -24,16 +24,27 @@ use clap::{
 use ::{
     dump::Dump,
     supplement::SupplementalData,
+    reflection_metadata::ReflectionMetadata,
 };
 
-fn load_combined_dump(dump_path: &Path, supplemental_path: &Path) -> Dump {
+fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplemental_path: &Path) -> Dump {
     let mut dump = Dump::read_from_file(dump_path)
         .expect("Could not load JSON API dump");
+
+    let metadata = ReflectionMetadata::read_from_file(reflection_metadata_path)
+        .expect("Could not load ReflectionMetadata!");
 
     let supplemental = SupplementalData::read_from_path(supplemental_path)
         .expect("Could not load supplemental data");
 
     for class in dump.classes.iter_mut() {
+        match metadata.classes.get(&class.name) {
+            Some(metadata_class) => {
+                class.description = Some(metadata_class.summary.clone());
+            },
+            None => {},
+        }
+
         match supplemental.item_descriptions.get(&class.name) {
             Some(description) => {
                 class.description = Some(description.prose.clone());
@@ -45,8 +56,8 @@ fn load_combined_dump(dump_path: &Path, supplemental_path: &Path) -> Dump {
     dump
 }
 
-fn miniwiki(dump_path: &Path, supplemental_path: &Path) {
-    let dump = load_combined_dump(dump_path, supplemental_path);
+fn miniwiki(dump_path: &Path, metadata_path: &Path, supplemental_path: &Path) {
+    let dump = load_combined_dump(dump_path, metadata_path, supplemental_path);
 
     let mut output = String::new();
     miniwiki::emit_wiki(&dump, &mut output).unwrap();
@@ -54,8 +65,8 @@ fn miniwiki(dump_path: &Path, supplemental_path: &Path) {
     println!("{}", output);
 }
 
-fn megadump(dump_path: &Path, supplemental_path: &Path) {
-    let dump = load_combined_dump(dump_path, supplemental_path);
+fn megadump(dump_path: &Path, metadata_path: &Path, supplemental_path: &Path) {
+    let dump = load_combined_dump(dump_path, metadata_path, supplemental_path);
 
     let output = serde_json::to_string(&dump)
         .expect("Could not convert dump to JSON");
@@ -67,6 +78,12 @@ fn main() {
     let dump_arg = Arg::with_name("dump")
         .long("dump")
         .help("The location of the Roblox JSON API dump")
+        .required(true)
+        .takes_value(true);
+
+    let metadata_arg = Arg::with_name("metadata")
+        .long("metadata")
+        .help("The location of the Roblox ReflectionMetadata.xml file")
         .required(true)
         .takes_value(true);
 
@@ -84,11 +101,13 @@ fn main() {
         .subcommand(SubCommand::with_name("miniwiki")
             .about("Generate a simple, single-page mini Roblox wiki")
             .arg(dump_arg.clone())
+            .arg(metadata_arg.clone())
             .arg(supplemental_arg.clone()))
 
         .subcommand(SubCommand::with_name("megadump")
             .about("Create an API dump file with additional data")
             .arg(dump_arg.clone())
+            .arg(metadata_arg.clone())
             .arg(supplemental_arg.clone()))
 
         .get_matches();
@@ -97,16 +116,18 @@ fn main() {
         ("miniwiki", command_matches) => {
             let command_matches = command_matches.unwrap();
             let dump_path = Path::new(command_matches.value_of("dump").unwrap());
+            let metadata_path = Path::new(command_matches.value_of("metadata").unwrap());
             let supplemental_path = Path::new(command_matches.value_of("supplemental").unwrap());
 
-            miniwiki(dump_path, supplemental_path);
+            miniwiki(dump_path, metadata_path, supplemental_path);
         },
         ("megadump", command_matches) => {
             let command_matches = command_matches.unwrap();
             let dump_path = Path::new(command_matches.value_of("dump").unwrap());
+            let metadata_path = Path::new(command_matches.value_of("metadata").unwrap());
             let supplemental_path = Path::new(command_matches.value_of("supplemental").unwrap());
 
-            megadump(dump_path, supplemental_path);
+            megadump(dump_path, metadata_path, supplemental_path);
         },
         _ => eprintln!("{}", matches.usage()),
     }

@@ -1,4 +1,7 @@
 /target
 **/*.rs.bk
+
+# Test data
 dump.json
-dump.html
+miniwiki.html
+ReflectionMetadata.xml
