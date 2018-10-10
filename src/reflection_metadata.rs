@@ -17,6 +17,56 @@ use quick_xml::{
     },
 };
 
+struct XmlQuery {
+    pieces: Vec<(&'static str, Vec<(&'static str, &'static str)>)>,
+}
+
+impl XmlQuery {
+    pub fn new(query: &[(&'static str, &[(&'static str, &'static str)])]) -> XmlQuery {
+        let pieces = query
+            .iter()
+            .map(|(tag_name, input_attributes)| (*tag_name, input_attributes.iter().cloned().collect::<Vec<_>>()))
+            .collect::<Vec<_>>();
+
+        XmlQuery {
+            pieces,
+        }
+    }
+
+    pub fn matches<B: BufRead>(&self, reader: &Reader<B>, element_stack: &[BytesStart<'static>]) -> bool {
+        if element_stack.len() != self.pieces.len() {
+            return false;
+        }
+
+        for (index, element) in element_stack.iter().enumerate() {
+            let (expected_tag_name, expected_attributes) = &self.pieces[index];
+
+            let tag_name = reader.decode(element.name());
+
+            if tag_name != *expected_tag_name {
+                return false;
+            }
+
+            if expected_attributes.len() > 0 {
+                let mut element_attributes = extract_attributes(reader, element.attributes());
+
+                for (key, expected_value) in expected_attributes {
+                    match element_attributes.get(*key) {
+                        Some(value) => {
+                            if value != expected_value {
+                                return false;
+                            }
+                        },
+                        None => return false,
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+}
+
 fn extract_attributes<B: BufRead>(reader: &Reader<B>, attributes: Attributes) -> HashMap<String, String> {
     let mut output = HashMap::new();
 
@@ -29,41 +79,6 @@ fn extract_attributes<B: BufRead>(reader: &Reader<B>, attributes: Attributes) ->
     }
 
     output
-}
-
-type XmlQuery = (&'static str, Option<Vec<(&'static str, &'static str)>>);
-
-fn element_stack_matches<B: BufRead>(reader: &Reader<B>, element_stack: &[BytesStart<'static>], query: &[XmlQuery]) -> bool {
-    if element_stack.len() != query.len() {
-        return false;
-    }
-
-    for (index, element) in element_stack.iter().enumerate() {
-        let (expected_tag_name, expected_attributes) = &query[index];
-
-        let tag_name = reader.decode(element.name());
-
-        if tag_name != *expected_tag_name {
-            return false;
-        }
-
-        if let Some(expected_attributes) = expected_attributes {
-            let mut element_attributes = extract_attributes(reader, element.attributes());
-
-            for (key, expected_value) in expected_attributes {
-                match element_attributes.get(*key) {
-                    Some(value) => {
-                        if value != expected_value {
-                            return false;
-                        }
-                    },
-                    None => return false,
-                }
-            }
-        }
-    }
-
-    return true;
 }
 
 #[derive(Debug)]
@@ -84,11 +99,11 @@ impl ReflectionMetadata {
         let mut element_stack: Vec<BytesStart<'static>> = Vec::new();
 
         lazy_static! {
-            static ref CLASS_QUERY: Vec<XmlQuery> = vec![
-                ("roblox", None),
-                ("Item", None),
-                ("Item", Some(vec![("class", "ReflectionMetadataClass")])),
-            ];
+            static ref CLASS_QUERY: XmlQuery = XmlQuery::new(&[
+                ("roblox", &[]),
+                ("Item", &[]),
+                ("Item", &[("class", "ReflectionMetadataClass")]),
+            ]);
         }
 
         loop {
@@ -96,8 +111,8 @@ impl ReflectionMetadata {
                 Ok(Event::Start(element)) => {
                     element_stack.push(element.into_owned());
 
-                    if element_stack_matches(&reader, &element_stack, &CLASS_QUERY) {
-                        let class = ReflectionMetadataClass::decode(&mut reader);
+                    if CLASS_QUERY.matches(&reader, &element_stack) {
+                        let class = ReflectionMetadataClass::decode(&mut reader, &mut element_stack);
                         classes.insert(class.name.clone(), class);
                     }
                 },
@@ -125,23 +140,23 @@ pub struct ReflectionMetadataClass {
 }
 
 impl ReflectionMetadataClass {
-    fn decode<B: BufRead>(reader: &mut Reader<B>) -> ReflectionMetadataClass {
+    fn decode<B: BufRead>(reader: &mut Reader<B>, element_stack: &mut Vec<BytesStart<'static>>) -> ReflectionMetadataClass {
         let mut name = String::new();
         let mut summary = String::new();
 
+        let start_stack_len = element_stack.len();
         let mut xml_buffer = Vec::new();
-        let mut element_stack: Vec<BytesStart<'static>> = Vec::new();
 
         lazy_static! {
-            static ref NAME_QUERY: Vec<XmlQuery> = vec![
-                ("Properties", None),
-                ("string", Some(vec![("name", "Name")])),
-            ];
+            static ref NAME_QUERY: XmlQuery = XmlQuery::new(&[
+                ("Properties", &[]),
+                ("string", &[("name", "Name")]),
+            ]);
 
-            static ref SUMMARY_QUERY: Vec<XmlQuery> = vec![
-                ("Properties", None),
-                ("string", Some(vec![("name", "summary")])),
-            ];
+            static ref SUMMARY_QUERY: XmlQuery = XmlQuery::new(&[
+                ("Properties", &[]),
+                ("string", &[("name", "summary")]),
+            ]);
         }
 
         loop {
@@ -150,16 +165,18 @@ impl ReflectionMetadataClass {
                     element_stack.push(element.into_owned());
                 },
                 Ok(Event::End(_)) => {
-                    if element_stack.len() == 0 {
+                    element_stack.pop();
+
+                    if element_stack.len() == start_stack_len {
                         break;
                     }
-
-                    element_stack.pop();
                 },
                 Ok(Event::Text(text)) => {
-                    if element_stack_matches(&reader, &element_stack, &NAME_QUERY) {
+                    let relevant_stack = &element_stack[start_stack_len..];
+
+                    if NAME_QUERY.matches(&reader, relevant_stack) {
                         name = text.unescape_and_decode(reader).unwrap();
-                    } else if element_stack_matches(&reader, &element_stack, &SUMMARY_QUERY) {
+                    } else if SUMMARY_QUERY.matches(&reader, relevant_stack) {
                         summary = text.unescape_and_decode(reader).unwrap();
                     }
                 },

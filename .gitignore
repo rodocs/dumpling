@@ -2,6 +2,6 @@
 **/*.rs.bk
 
 # Test data
-dump.json
-miniwiki.html
-ReflectionMetadata.xml
+/dump.json
+/miniwiki.html
+/ReflectionMetadata.xml
