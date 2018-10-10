@@ -1,4 +1,5 @@
 #[macro_use] extern crate serde_derive;
+#[macro_use] extern crate lazy_static;
 
 extern crate clap;
 extern crate pulldown_cmark;

@@ -11,24 +11,59 @@ use std::{
 use quick_xml::{
     Reader,
     events::{
+        BytesStart,
         Event,
         attributes::Attributes,
     },
 };
 
-fn get_attribute<B: BufRead>(key: &str, reader: &Reader<B>, attributes: Attributes) -> Option<String> {
+fn extract_attributes<B: BufRead>(reader: &Reader<B>, attributes: Attributes) -> HashMap<String, String> {
+    let mut output = HashMap::new();
+
     for attribute in attributes {
         let attribute = attribute.unwrap();
-        let this_key = reader.decode(attribute.key);
+        let key = reader.decode(&attribute.key).to_string();
+        let value = reader.decode(&attribute.value).to_string();
 
-        if this_key == key {
-            let value = reader.decode(&attribute.value);
+        output.insert(key, value);
+    }
 
-            return Some(value.to_string());
+    output
+}
+
+type XmlQuery = (&'static str, Option<Vec<(&'static str, &'static str)>>);
+
+fn element_stack_matches<B: BufRead>(reader: &Reader<B>, element_stack: &[BytesStart<'static>], query: &[XmlQuery]) -> bool {
+    if element_stack.len() != query.len() {
+        return false;
+    }
+
+    for (index, element) in element_stack.iter().enumerate() {
+        let (expected_tag_name, expected_attributes) = &query[index];
+
+        let tag_name = reader.decode(element.name());
+
+        if tag_name != *expected_tag_name {
+            return false;
+        }
+
+        if let Some(expected_attributes) = expected_attributes {
+            let mut element_attributes = extract_attributes(reader, element.attributes());
+
+            for (key, expected_value) in expected_attributes {
+                match element_attributes.get(*key) {
+                    Some(value) => {
+                        if value != expected_value {
+                            return false;
+                        }
+                    },
+                    None => return false,
+                }
+            }
         }
     }
 
-    None
+    return true;
 }
 
 #[derive(Debug)]
@@ -46,20 +81,28 @@ impl ReflectionMetadata {
         reader.trim_text(true);
 
         let mut xml_buffer = Vec::new();
+        let mut element_stack: Vec<BytesStart<'static>> = Vec::new();
+
+        lazy_static! {
+            static ref CLASS_QUERY: Vec<XmlQuery> = vec![
+                ("roblox", None),
+                ("Item", None),
+                ("Item", Some(vec![("class", "ReflectionMetadataClass")])),
+            ];
+        }
 
         loop {
             match reader.read_event(&mut xml_buffer) {
                 Ok(Event::Start(element)) => {
-                    let element_name = reader.decode(element.name());
+                    element_stack.push(element.into_owned());
 
-                    if element_name == "Item" {
-                        if let Some(class_name) = get_attribute("class", &reader, element.attributes()) {
-                            if class_name == "ReflectionMetadataClass" {
-                                let class = ReflectionMetadataClass::decode(&mut reader);
-                                classes.insert(class.name.clone(), class);
-                            }
-                        }
+                    if element_stack_matches(&reader, &element_stack, &CLASS_QUERY) {
+                        let class = ReflectionMetadataClass::decode(&mut reader);
+                        classes.insert(class.name.clone(), class);
                     }
+                },
+                Ok(Event::End(_)) => {
+                    element_stack.pop();
                 },
                 Ok(Event::Eof) => break,
                 Err(_) => panic!("Error parsing XML!"),
@@ -86,61 +129,38 @@ impl ReflectionMetadataClass {
         let mut name = String::new();
         let mut summary = String::new();
 
-        let mut depth: u32 = 1;
         let mut xml_buffer = Vec::new();
-        let mut in_properties = false;
-        let mut in_name = false;
-        let mut in_summary = false;
+        let mut element_stack: Vec<BytesStart<'static>> = Vec::new();
+
+        lazy_static! {
+            static ref NAME_QUERY: Vec<XmlQuery> = vec![
+                ("Properties", None),
+                ("string", Some(vec![("name", "Name")])),
+            ];
+
+            static ref SUMMARY_QUERY: Vec<XmlQuery> = vec![
+                ("Properties", None),
+                ("string", Some(vec![("name", "summary")])),
+            ];
+        }
 
         loop {
             match reader.read_event(&mut xml_buffer) {
                 Ok(Event::Start(element)) => {
-                    depth += 1;
-
-                    let element_name = reader.decode(element.name());
-
-                    if element_name == "Properties" && depth == 2 {
-                        in_properties = true;
-                        continue;
-                    }
-
-                    if in_properties {
-                        match get_attribute("name", reader, element.attributes()) {
-                            Some(property_name) => {
-                                match property_name.as_str() {
-                                    "Name" => { in_name = true },
-                                    "summary" => { in_summary = true },
-                                    _ => {},
-                                }
-                            },
-                            None => {},
-                        }
-                    }
+                    element_stack.push(element.into_owned());
                 },
-                Ok(Event::End(element)) => {
-                    depth -= 1;
-
-                    if depth == 0 {
+                Ok(Event::End(_)) => {
+                    if element_stack.len() == 0 {
                         break;
                     }
 
-                    in_name = false;
-                    in_summary = false;
-
-                    let element_name = reader.decode(element.name());
-
-                    if element_name == "Properties" && depth == 1 {
-                        in_properties = false;
-                        continue;
-                    }
+                    element_stack.pop();
                 },
                 Ok(Event::Text(text)) => {
-                    if in_properties {
-                        if in_name {
-                            name = text.unescape_and_decode(reader).unwrap();
-                        } else if in_summary {
-                            summary = text.unescape_and_decode(reader).unwrap();
-                        }
+                    if element_stack_matches(&reader, &element_stack, &NAME_QUERY) {
+                        name = text.unescape_and_decode(reader).unwrap();
+                    } else if element_stack_matches(&reader, &element_stack, &SUMMARY_QUERY) {
+                        summary = text.unescape_and_decode(reader).unwrap();
                     }
                 },
                 Ok(Event::Eof) => break,

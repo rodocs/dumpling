@@ -5,6 +5,7 @@ authors = ["lgreathouse <me@lpghatguy.com>"]
 
 [dependencies]
 clap = "2.32"
+lazy_static = "1.0"
 pulldown-cmark = { version = "0.1.2", default-features = false }
 quick-xml = "0.13.0"
 serde = "1.0"
