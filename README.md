@@ -1,12 +1,15 @@
 # Dumpling
 Dumpling is a tool to combine Roblox's JSON API dump with user-authored descriptions of APIs.
 
-## Goals
-* Aggregate:
-	* Roblox JSON API dump
-	* ReflectionMetadata.xml
-	* Community-authored descriptions
-* Produces easily consumed JSON
+Dumpling aggregates a bunch of data:
+* Roblox JSON API dump
+* ReflectionMetadata.xml
+* Hand-crafted heuristics
+* Community-authored descriptions
+
+Dumpling produces easily consumed JSON in the same structure as the current Roblox JSON API dump, meaning it's pretty close to a drop-in replacement!
+
+It can also produce a single file, offline-accesible miniature Roblox API reference that can be used to verify its content.
 
 ## Usage
 Dumpling has two modes to demonstrate its functionality: Megadump, and Miniwiki.

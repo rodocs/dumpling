@@ -13,6 +13,7 @@ pub mod miniwiki;
 pub mod supplement;
 pub mod templating;
 pub mod reflection_metadata;
+pub mod heuristics;
 
 use std::path::Path;
 
@@ -55,7 +56,11 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplem
             },
             None => {},
         }
+    }
 
+    heuristics::camelcase_members_probably_deprecated(&mut dump);
+
+    for class in dump.classes.iter_mut() {
         match supplemental.item_descriptions.get(&class.name) {
             Some(description) => {
                 class.description = Some(description.prose.clone());
