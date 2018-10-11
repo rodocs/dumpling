@@ -137,10 +137,85 @@ impl ReflectionMetadata {
 pub struct ReflectionMetadataClass {
     pub name: String,
     pub summary: String,
+    pub members: Vec<ReflectionMetadataMember>,
 }
 
 impl ReflectionMetadataClass {
     fn decode<B: BufRead>(reader: &mut Reader<B>, element_stack: &mut Vec<BytesStart<'static>>) -> ReflectionMetadataClass {
+        let mut name = String::new();
+        let mut summary = String::new();
+        let mut members = Vec::new();
+
+        let start_stack_len = element_stack.len();
+        let mut xml_buffer = Vec::new();
+
+        lazy_static! {
+            static ref NAME_QUERY: XmlQuery = XmlQuery::new(&[
+                ("Properties", &[]),
+                ("string", &[("name", "Name")]),
+            ]);
+
+            static ref SUMMARY_QUERY: XmlQuery = XmlQuery::new(&[
+                ("Properties", &[]),
+                ("string", &[("name", "summary")]),
+            ]);
+
+            static ref MEMBER_QUERY: XmlQuery = XmlQuery::new(&[
+                ("Item", &[]), // class is "ReflectionMetadataFunctions" or similar; we don't care.
+                ("Item", &[("class", "ReflectionMetadataMember")]),
+            ]);
+        }
+
+        loop {
+            match reader.read_event(&mut xml_buffer) {
+                Ok(Event::Start(element)) => {
+                    element_stack.push(element.into_owned());
+
+                    if MEMBER_QUERY.matches(&reader, &element_stack) {
+                        let member = ReflectionMetadataMember::decode(reader, element_stack);
+                        members.push(member);
+                    }
+                },
+                Ok(Event::End(_)) => {
+                    element_stack.pop();
+
+                    if element_stack.len() == start_stack_len {
+                        break;
+                    }
+                },
+                Ok(Event::Text(text)) => {
+                    let relevant_stack = &element_stack[start_stack_len..];
+
+                    if NAME_QUERY.matches(&reader, relevant_stack) {
+                        name = text.unescape_and_decode(reader).unwrap();
+                    } else if SUMMARY_QUERY.matches(&reader, relevant_stack) {
+                        summary = text.unescape_and_decode(reader).unwrap();
+                    }
+                },
+                Ok(Event::Eof) => break,
+                Err(_) => panic!("Error parsing ReflectionMetadataClass!"),
+                _ => {},
+            }
+
+            xml_buffer.clear();
+        }
+
+        ReflectionMetadataClass {
+            name,
+            summary,
+            members,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ReflectionMetadataMember {
+    pub name: String,
+    pub summary: String,
+}
+
+impl ReflectionMetadataMember {
+    fn decode<B: BufRead>(reader: &mut Reader<B>, element_stack: &mut Vec<BytesStart<'static>>) -> ReflectionMetadataMember {
         let mut name = String::new();
         let mut summary = String::new();
 
@@ -188,7 +263,7 @@ impl ReflectionMetadataClass {
             xml_buffer.clear();
         }
 
-        ReflectionMetadataClass {
+        ReflectionMetadataMember {
             name,
             summary,
         }
