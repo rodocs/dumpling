@@ -111,10 +111,13 @@ fn emit_property(property: &DumpClassProperty) -> HtmlTag {
     let mut container = tag_class("div", "dump-class-property")
         .child(signature);
 
-    if let Some(description) = &property.description {
-        container.add_child(tag_class("div", "dump-class-property-description")
-            .child(markdownify(description)));
-    }
+    let description = property.description
+        .as_ref()
+        .map(String::as_str)
+        .unwrap_or("*No description available.*");
+
+    container.add_child(tag_class("div", "dump-class-property-description markdown")
+        .child(markdownify(description)));
 
     container
 }
@@ -143,10 +146,13 @@ fn emit_function(function: &DumpClassFunction) -> HtmlTag {
     let mut container = tag_class("div", "dump-class-function")
         .child(signature);
 
-    if let Some(description) = &function.description {
-        container.add_child(tag_class("div", "dump-class-function-description")
-            .child(markdownify(description)));
-    }
+    let description = function.description
+        .as_ref()
+        .map(String::as_str)
+        .unwrap_or("*No description available.*");
+
+    container.add_child(tag_class("div", "dump-class-function-description markdown")
+        .child(markdownify(description)));
 
     container
 }
@@ -156,10 +162,13 @@ fn emit_event(event: &DumpClassEvent) -> HtmlTag {
         .child(tag_class("div", "dump-class-event-name")
             .child(&event.name));
 
-    if let Some(description) = &event.description {
-        container.add_child(tag_class("div", "dump-class-event-description")
-            .child(markdownify(description)));
-    }
+    let description = event.description
+        .as_ref()
+        .map(String::as_str)
+        .unwrap_or("*No description available.*");
+
+    container.add_child(tag_class("div", "dump-class-event-description markdown")
+        .child(markdownify(description)));
 
     container
 }
@@ -169,10 +178,13 @@ fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
         .child(tag_class("div", "dump-class-callback-name")
             .child(&callback.name));
 
-    if let Some(description) = &callback.description {
-        container.add_child(tag_class("div", "dump-class-callback-description")
-            .child(markdownify(description)));
-    }
+    let description = callback.description
+        .as_ref()
+        .map(String::as_str)
+        .unwrap_or("*No description available.*");
+
+    container.add_child(tag_class("div", "dump-class-callback-description markdown")
+        .child(markdownify(description)));
 
     container
 }
