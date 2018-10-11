@@ -122,7 +122,7 @@ fn emit_function(function: &DumpClassFunction) -> HtmlTag {
         .child("(");
 
     for (index, param) in function.parameters.iter().enumerate() {
-        signature.add_child(tag("span").child(&param.name));
+        signature.add_child(tag_class("span", "dump-function-argument-name").child(&param.name));
         signature.add_child(": ");
         signature.add_child(emit_type_link(&param.kind.name));
 

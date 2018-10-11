@@ -39,6 +39,32 @@ a, a:visited {
 	font-weight: bold;
 }
 
+.dump-class-property,
+.dump-class-function,
+.dump-class-event,
+.dump-class-callback {
+	margin-bottom: 1rem;
+}
+
+.dump-class-property-name,
+.dump-class-function-name,
+.dump-class-event-name,
+.dump-class-callback-name {
+	font-size: 1.1rem;
+	font-family: monospace;
+}
+
+.dump-class-property-description,
+.dump-class-function-description,
+.dump-class-event-description,
+.dump-class-callback-description {
+	padding: 0 1rem;
+}
+
+.dump-function-argument-name {
+	font-weight: bold;
+}
+
 .markdown h1 {
 	font-size: 2rem;
 	font-weight: bold;
