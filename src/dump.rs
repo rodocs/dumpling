@@ -68,6 +68,26 @@ pub enum DumpClassMember {
     Callback(DumpClassCallback),
 }
 
+impl DumpClassMember {
+    pub fn get_name(&self) -> &str {
+        match self {
+            DumpClassMember::Property(inner) => inner.name.as_str(),
+            DumpClassMember::Function(inner) => inner.name.as_str(),
+            DumpClassMember::Event(inner) => inner.name.as_str(),
+            DumpClassMember::Callback(inner) => inner.name.as_str(),
+        }
+    }
+
+    pub fn set_description(&mut self, description: String) {
+        match self {
+            DumpClassMember::Property(inner) => inner.description = Some(description),
+            DumpClassMember::Function(inner) => inner.description = Some(description),
+            DumpClassMember::Event(inner) => inner.description = Some(description),
+            DumpClassMember::Callback(inner) => inner.description = Some(description),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DumpClassProperty {
     #[serde(rename = "Name")]

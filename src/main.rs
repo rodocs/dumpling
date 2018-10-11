@@ -41,7 +41,17 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplem
     for class in dump.classes.iter_mut() {
         match metadata.classes.get(&class.name) {
             Some(metadata_class) => {
-                class.description = Some(metadata_class.summary.clone());
+                if metadata_class.summary.len() > 0 {
+                    class.description = Some(metadata_class.summary.clone());
+                }
+
+                for member in class.members.iter_mut() {
+                    if let Some(meta_member) = metadata_class.members.get(member.get_name()) {
+                        if meta_member.summary.len() > 0 {
+                            member.set_description(meta_member.summary.clone());
+                        }
+                    }
+                }
             },
             None => {},
         }

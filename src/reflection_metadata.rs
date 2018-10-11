@@ -137,14 +137,14 @@ impl ReflectionMetadata {
 pub struct ReflectionMetadataClass {
     pub name: String,
     pub summary: String,
-    pub members: Vec<ReflectionMetadataMember>,
+    pub members: HashMap<String, ReflectionMetadataMember>,
 }
 
 impl ReflectionMetadataClass {
     fn decode<B: BufRead>(reader: &mut Reader<B>, element_stack: &mut Vec<BytesStart<'static>>) -> ReflectionMetadataClass {
         let mut name = String::new();
         let mut summary = String::new();
-        let mut members = Vec::new();
+        let mut members = HashMap::new();
 
         let start_stack_len = element_stack.len();
         let mut xml_buffer = Vec::new();
@@ -171,15 +171,18 @@ impl ReflectionMetadataClass {
                 Ok(Event::Start(element)) => {
                     element_stack.push(element.into_owned());
 
-                    if MEMBER_QUERY.matches(&reader, &element_stack) {
+                    if MEMBER_QUERY.matches(&reader, &element_stack[start_stack_len..]) {
                         let member = ReflectionMetadataMember::decode(reader, element_stack);
-                        members.push(member);
+
+                        eprintln!("Found member {}", member.name);
+
+                        members.insert(member.name.clone(), member);
                     }
                 },
                 Ok(Event::End(_)) => {
                     element_stack.pop();
 
-                    if element_stack.len() == start_stack_len {
+                    if element_stack.len() < start_stack_len {
                         break;
                     }
                 },
@@ -242,7 +245,7 @@ impl ReflectionMetadataMember {
                 Ok(Event::End(_)) => {
                     element_stack.pop();
 
-                    if element_stack.len() == start_stack_len {
+                    if element_stack.len() < start_stack_len {
                         break;
                     }
                 },
