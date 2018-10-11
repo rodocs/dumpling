@@ -103,90 +103,78 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
 }
 
 fn emit_property(property: &DumpClassProperty) -> HtmlTag {
-    let signature = tag("span")
-        .child(tag_class("span", "dump-class-property-name").child(&property.name))
-        .child(": ")
-        .child(emit_type_link(&property.kind.name));
-
-    let mut container = tag_class("div", "dump-class-property")
-        .child(signature);
-
     let description = property.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or("*No description available.*");
 
-    container.add_child(tag_class("div", "dump-class-property-description markdown")
-        .child(markdownify(description)));
-
-    container
+    tag_class("div", "dump-class-property")
+        .child(tag("span")
+            .child(tag_class("span", "dump-class-property-name")
+                .child(&property.name))
+            .child(": ")
+            .child(emit_type_link(&property.kind.name)))
+        .child(tag_class("div", "dump-class-property-description markdown")
+            .child(markdownify(description)))
 }
 
 fn emit_function(function: &DumpClassFunction) -> HtmlTag {
-    let mut signature = tag_class("div", "dump-class-function-signature")
-        .child(tag_class("span", "dump-class-function-name").child(&function.name))
-        .child("(");
-
-    for (index, param) in function.parameters.iter().enumerate() {
-        let mut parameter = tag_class("div", "dump-function-argument")
-            .child(tag_class("span", "dump-function-argument-name").child(&param.name))
-            .child(": ")
-            .child(emit_type_link(&param.kind.name));
-
-        if index < function.parameters.len() - 1 {
-            parameter.add_child(", ");
-        }
-
-        signature.add_child(parameter);
-    }
-
-    signature.add_child("): ");
-    signature.add_child(emit_type_link(&function.return_type.name));
-
-    let mut container = tag_class("div", "dump-class-function")
-        .child(signature);
-
     let description = function.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or("*No description available.*");
 
-    container.add_child(tag_class("div", "dump-class-function-description markdown")
-        .child(markdownify(description)));
+    let parameters = function.parameters
+        .iter()
+        .enumerate()
+        .map(|(index, param)| {
+            let mut parameter = tag_class("div", "dump-function-argument")
+                .child(tag_class("span", "dump-function-argument-name").child(&param.name))
+                .child(": ")
+                .child(emit_type_link(&param.kind.name));
 
-    container
+            if index < function.parameters.len() - 1 {
+                parameter.add_child(", ");
+            }
+
+            parameter
+        });
+
+    tag_class("div", "dump-class-function")
+        .child(tag_class("div", "dump-class-function-signature")
+            .child(tag_class("span", "dump-class-function-name").child(&function.name))
+            .child("(")
+            .children(parameters)
+            .child("): ")
+            .child(emit_type_link(&function.return_type.name)))
+        .child(tag_class("div", "dump-class-function-description markdown")
+            .child(markdownify(description)))
 }
 
 fn emit_event(event: &DumpClassEvent) -> HtmlTag {
-    let mut container = tag_class("div", "dump-class-event")
-        .child(tag_class("div", "dump-class-event-name")
-            .child(&event.name));
-
     let description = event.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or("*No description available.*");
 
-    container.add_child(tag_class("div", "dump-class-event-description markdown")
-        .child(markdownify(description)));
-
-    container
+    tag_class("div", "dump-class-event")
+        .child(tag_class("div", "dump-class-event-name")
+            .child(&event.name))
+        .child(tag_class("div", "dump-class-event-description markdown")
+                .child(markdownify(description)))
 }
 
 fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
-    let mut container = tag_class("div", "dump-class-callback")
-        .child(tag_class("div", "dump-class-callback-name")
-            .child(&callback.name));
-
     let description = callback.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or("*No description available.*");
 
-    container.add_child(tag_class("div", "dump-class-callback-description markdown")
-        .child(markdownify(description)));
-
-    container
+    tag_class("div", "dump-class-callback")
+        .child(tag_class("div", "dump-class-callback-name")
+            .child(&callback.name))
+        .child(tag_class("div", "dump-class-callback-description markdown")
+            .child(markdownify(description)))
 }
 
 fn emit_type_link(name: &str) -> HtmlTag {
