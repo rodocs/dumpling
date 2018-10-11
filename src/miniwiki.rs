@@ -19,6 +19,8 @@ use ::{
 
 static STYLE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/miniwiki.css"));
 
+static DEFAULT_DESCRIPTION: &str = "*No description available.*";
+
 fn markdownify(input: &str) -> HtmlContent {
     let parser = pulldown_cmark::Parser::new(input);
     let mut output = String::new();
@@ -106,7 +108,7 @@ fn emit_property(property: &DumpClassProperty) -> HtmlTag {
     let description = property.description
         .as_ref()
         .map(String::as_str)
-        .unwrap_or("*No description available.*");
+        .unwrap_or(DEFAULT_DESCRIPTION);
 
     tag_class("div", "dump-class-property")
         .child(tag("span")
@@ -122,7 +124,7 @@ fn emit_function(function: &DumpClassFunction) -> HtmlTag {
     let description = function.description
         .as_ref()
         .map(String::as_str)
-        .unwrap_or("*No description available.*");
+        .unwrap_or(DEFAULT_DESCRIPTION);
 
     let parameters = function.parameters
         .iter()
@@ -155,7 +157,7 @@ fn emit_event(event: &DumpClassEvent) -> HtmlTag {
     let description = event.description
         .as_ref()
         .map(String::as_str)
-        .unwrap_or("*No description available.*");
+        .unwrap_or(DEFAULT_DESCRIPTION);
 
     tag_class("div", "dump-class-event")
         .child(tag_class("div", "dump-class-event-name")
@@ -168,7 +170,7 @@ fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
     let description = callback.description
         .as_ref()
         .map(String::as_str)
-        .unwrap_or("*No description available.*");
+        .unwrap_or(DEFAULT_DESCRIPTION);
 
     tag_class("div", "dump-class-callback")
         .child(tag_class("div", "dump-class-callback-name")
