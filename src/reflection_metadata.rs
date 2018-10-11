@@ -174,8 +174,6 @@ impl ReflectionMetadataClass {
                     if MEMBER_QUERY.matches(&reader, &element_stack[start_stack_len..]) {
                         let member = ReflectionMetadataMember::decode(reader, element_stack);
 
-                        eprintln!("Found member {}", member.name);
-
                         members.insert(member.name.clone(), member);
                     }
                 },
