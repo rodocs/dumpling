@@ -19,6 +19,14 @@ use ::{
 
 static STYLE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/miniwiki.css"));
 
+fn markdownify(input: &str) -> HtmlContent {
+    let parser = pulldown_cmark::Parser::new(input);
+    let mut output = String::new();
+    pulldown_cmark::html::push_html(&mut output, parser);
+
+    HtmlContent::Raw(output)
+}
+
 pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
 
@@ -41,24 +49,20 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
             .child(&class.name));
 
     if let Some(superclass) = &class.superclass {
-        container.add_child(tag("p")
+        container.add_child(tag_class("p", "dump-class-inherits")
             .child("Inherits: ")
             .child(emit_type_link(superclass)));
     }
 
     if class.tags.len() > 0 {
-        container.add_child(tag("p")
+        container.add_child(tag_class("p", "dump-class-tags")
             .child("Tags: ")
             .child(&class.tags.join(", ")));
     }
 
     if let Some(description) = &class.description {
-        let mut html_description = String::new();
-        let parser = pulldown_cmark::Parser::new(description);
-        pulldown_cmark::html::push_html(&mut html_description, parser);
-
-        container.add_child(tag_class("div", "markdown")
-            .child(HtmlContent::Raw(html_description)));
+        container.add_child(tag_class("div", "dump-class-description markdown")
+            .child(markdownify(description)));
     }
 
     let mut properties = tag_class("div", "dump-class-properties");
@@ -110,37 +114,39 @@ fn emit_property(property: &DumpClassProperty) -> HtmlTag {
 
     if let Some(description) = &property.description {
         container.add_child(tag_class("div", "dump-class-property-description")
-            .child(description));
+            .child(markdownify(description)));
     }
 
     container
 }
 
 fn emit_function(function: &DumpClassFunction) -> HtmlTag {
-    let mut signature = tag("span")
-        .child(&function.name)
+    let mut signature = tag_class("div", "dump-class-function-signature")
+        .child(tag_class("span", "dump-class-function-name").child(&function.name))
         .child("(");
 
     for (index, param) in function.parameters.iter().enumerate() {
-        signature.add_child(tag_class("span", "dump-function-argument-name").child(&param.name));
-        signature.add_child(": ");
-        signature.add_child(emit_type_link(&param.kind.name));
+        let mut parameter = tag_class("div", "dump-function-argument")
+            .child(tag_class("span", "dump-function-argument-name").child(&param.name))
+            .child(": ")
+            .child(emit_type_link(&param.kind.name));
 
         if index < function.parameters.len() - 1 {
-            signature.add_child(", ");
+            parameter.add_child(", ");
         }
+
+        signature.add_child(parameter);
     }
 
     signature.add_child("): ");
     signature.add_child(emit_type_link(&function.return_type.name));
 
     let mut container = tag_class("div", "dump-class-function")
-        .child(tag_class("div", "dump-class-function-name")
-            .child(signature));
+        .child(signature);
 
     if let Some(description) = &function.description {
         container.add_child(tag_class("div", "dump-class-function-description")
-            .child(description));
+            .child(markdownify(description)));
     }
 
     container
@@ -153,7 +159,7 @@ fn emit_event(event: &DumpClassEvent) -> HtmlTag {
 
     if let Some(description) = &event.description {
         container.add_child(tag_class("div", "dump-class-event-description")
-            .child(description));
+            .child(markdownify(description)));
     }
 
     container
@@ -166,7 +172,7 @@ fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
 
     if let Some(description) = &callback.description {
         container.add_child(tag_class("div", "dump-class-callback-description")
-            .child(description));
+            .child(markdownify(description)));
     }
 
     container

@@ -17,9 +17,7 @@ impl<'a> fmt::Display for HtmlEscape<'a> {
         // time regardless of escapes.
         for value in self.0.chars() {
             match value {
-                '"' => output.write_str("&quot;")?,
                 '&' => output.write_str("&amp;")?,
-                '\'' => output.write_str("&#x27;")?,
                 '<' => output.write_str("&lt;")?,
                 '>' => output.write_str("&gt;")?,
                 _ => output.write_char(value)?,
