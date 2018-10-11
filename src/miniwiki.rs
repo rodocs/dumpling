@@ -34,6 +34,9 @@ pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
 
     let html = tag("html")
         .child(tag("head")
+            // Templating system doesn't do self-closing tags yet
+            .child(HtmlContent::Raw("<meta charset=\"utf-8\" />".to_string()))
+            .child(HtmlContent::Raw("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,shrink-to-fit=no\" />".to_string()))
             .child(tag("title").child("Dumpling"))
             .child(tag("style").child(STYLE)))
         .child(tag("body")
