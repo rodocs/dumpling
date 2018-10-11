@@ -13,6 +13,7 @@ html {
 	font-family: sans-serif;
 	font-size: 18px;
 	line-height: 1.4;
+	overflow: auto;
 }
 
 a, a:visited {
@@ -72,7 +73,11 @@ a::after {
 
 /* new */
 .dump-class-member-section {
-	padding: 0 0.5rem;
+	margin-top: 0.5rem;
+}
+
+.dump-class-member-section:not(:last-child) {
+	border-bottom: 2px solid rgba(0, 0, 0, 0.25);
 }
 
 /* new */
@@ -81,52 +86,26 @@ a::after {
 
 /* new */
 .dump-class-member {
+	padding: 0.5rem;
+}
+
+.dump-class-member:not(:last-child) {
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dump-class-member:first-of-type {
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* new */
 .dump-class-member-name {
-}
-
-/* new */
-.dump-class-member-description {
-}
-
-.dump-class-property,
-.dump-class-function,
-.dump-class-event,
-.dump-class-callback {
-	padding: 0 0.5rem 0.5rem 0.5rem;
-}
-
-.dump-class-property:not(:last-child),
-.dump-class-function:not(:last-child),
-.dump-class-event:not(:last-child),
-.dump-class-callback:not(:last-child) {
-	margin-bottom: 0.5rem;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.dump-class-properties,
-.dump-class-functions,
-.dump-class-events,
-.dump-class-callbacks {
-	margin-bottom: 0.5rem;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-}
-
-.dump-class-property-name,
-.dump-class-function-name,
-.dump-class-event-name,
-.dump-class-callback-name {
 	font-weight: bold;
 	font-family: monospace;
 }
 
-.dump-class-property-description,
-.dump-class-function-description,
-.dump-class-event-description,
-.dump-class-callback-description {
-	padding: 0 1rem;
+/* new */
+.dump-class-member-description {
+	padding-top: 1rem;
 }
 
 .dump-class-function-signature {
@@ -139,9 +118,6 @@ a::after {
 
 .dump-function-argument {
 	margin-left: 2rem;
-}
-
-.dump-function-argument-name {
 }
 
 .markdown h1 {

@@ -70,10 +70,10 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
             .child(markdownify(description)));
     }
 
-    let mut properties = tag_class("div", "dump-class-properties");
-    let mut functions = tag_class("div", "dump-class-functions");
-    let mut events = tag_class("div", "dump-class-events");
-    let mut callbacks = tag_class("div", "dump-class-callbacks");
+    let mut properties = tag_class("div", "dump-class-member-section-list");
+    let mut functions = tag_class("div", "dump-class-member-section-list");
+    let mut events = tag_class("div", "dump-class-member-section-list");
+    let mut callbacks = tag_class("div", "dump-class-member-section-list");
 
     for member in &class.members {
         match member {
@@ -85,23 +85,27 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
     }
 
     if properties.child_count() > 0 {
-        container.add_child(tag_class("div", "dump-class-subtitle").child("Properties"));
-        container.add_child(properties);
+        container.add_child(tag_class("div", "dump-class-member-section")
+            .child(tag_class("div", "dump-class-subtitle").child("Properties"))
+            .child(properties));
     }
 
     if functions.child_count() > 0 {
-        container.add_child(tag_class("div", "dump-class-subtitle").child("Functions"));
-        container.add_child(functions);
+        container.add_child(tag_class("div", "dump-class-member-section")
+            .child(tag_class("div", "dump-class-subtitle").child("Functions"))
+            .child(functions));
     }
 
     if events.child_count() > 0 {
-        container.add_child(tag_class("div", "dump-class-subtitle").child("Events"));
-        container.add_child(events);
+        container.add_child(tag_class("div", "dump-class-member-section")
+            .child(tag_class("div", "dump-class-subtitle").child("Events"))
+            .child(events));
     }
 
     if callbacks.child_count() > 0 {
-        container.add_child(tag_class("div", "dump-class-subtitle").child("Callbacks"));
-        container.add_child(callbacks);
+        container.add_child(tag_class("div", "dump-class-member-section")
+            .child(tag_class("div", "dump-class-subtitle").child("Callbacks"))
+            .child(callbacks));
     }
 
     container
@@ -113,13 +117,13 @@ fn emit_property(property: &DumpClassProperty) -> HtmlTag {
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    tag_class("div", "dump-class-property")
+    tag_class("div", "dump-class-member")
         .child(tag("span")
-            .child(tag_class("span", "dump-class-property-name")
+            .child(tag_class("span", "dump-class-member-name")
                 .child(&property.name))
             .child(": ")
             .child(emit_type_link(&property.kind.name)))
-        .child(tag_class("div", "dump-class-property-description markdown")
+        .child(tag_class("div", "dump-class-member-description markdown")
             .child(markdownify(description)))
 }
 
@@ -134,7 +138,7 @@ fn emit_function(function: &DumpClassFunction) -> HtmlTag {
         .enumerate()
         .map(|(index, param)| {
             let mut parameter = tag_class("div", "dump-function-argument")
-                .child(tag_class("span", "dump-function-argument-name").child(&param.name))
+                .child(&param.name)
                 .child(": ")
                 .child(emit_type_link(&param.kind.name));
 
@@ -145,14 +149,14 @@ fn emit_function(function: &DumpClassFunction) -> HtmlTag {
             parameter
         });
 
-    tag_class("div", "dump-class-function")
+    tag_class("div", "dump-class-member")
         .child(tag_class("div", "dump-class-function-signature")
-            .child(tag_class("span", "dump-class-function-name").child(&function.name))
+            .child(tag_class("span", "dump-class-member-name").child(&function.name))
             .child("(")
             .children(parameters)
             .child("): ")
             .child(emit_type_link(&function.return_type.name)))
-        .child(tag_class("div", "dump-class-function-description markdown")
+        .child(tag_class("div", "dump-class-member-description markdown")
             .child(markdownify(description)))
 }
 
@@ -162,10 +166,10 @@ fn emit_event(event: &DumpClassEvent) -> HtmlTag {
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    tag_class("div", "dump-class-event")
-        .child(tag_class("div", "dump-class-event-name")
+    tag_class("div", "dump-class-member")
+        .child(tag_class("div", "dump-class-member-name")
             .child(&event.name))
-        .child(tag_class("div", "dump-class-event-description markdown")
+        .child(tag_class("div", "dump-class-member-description markdown")
                 .child(markdownify(description)))
 }
 
@@ -175,10 +179,10 @@ fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    tag_class("div", "dump-class-callback")
-        .child(tag_class("div", "dump-class-callback-name")
+    tag_class("div", "dump-class-member")
+        .child(tag_class("div", "dump-class-member-name")
             .child(&callback.name))
-        .child(tag_class("div", "dump-class-callback-description markdown")
+        .child(tag_class("div", "dump-class-member-description markdown")
             .child(markdownify(description)))
 }
 
