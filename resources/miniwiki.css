@@ -80,11 +80,9 @@ a::after {
 	border-bottom: 2px solid rgba(0, 0, 0, 0.25);
 }
 
-/* new */
 .dump-class-member-section-list {
 }
 
-/* new */
 .dump-class-member {
 	padding: 0.5rem;
 }
@@ -97,13 +95,11 @@ a::after {
 	border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* new */
 .dump-class-member-name {
 	font-weight: bold;
 	font-family: monospace;
 }
 
-/* new */
 .dump-class-member-description {
 	padding-top: 1rem;
 }
