@@ -24,7 +24,7 @@ use clap::{
 };
 
 use ::{
-    dump::Dump,
+    dump::{Dump, ContentSource},
     supplement::SupplementalData,
     reflection_metadata::ReflectionMetadata,
 };
@@ -49,7 +49,7 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplem
                 for member in class.members.iter_mut() {
                     if let Some(meta_member) = metadata_class.members.get(member.get_name()) {
                         if meta_member.summary.len() > 0 {
-                            member.set_description(meta_member.summary.clone());
+                            member.set_description(meta_member.summary.clone(), ContentSource::ReflectionMetadata);
                         }
                     }
                 }
@@ -64,6 +64,7 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplem
         match supplemental.item_descriptions.get(&class.name) {
             Some(description) => {
                 class.description = Some(description.prose.clone());
+                class.description_source = Some(ContentSource::Supplemental);
             },
             None => {},
         }

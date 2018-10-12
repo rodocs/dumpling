@@ -32,6 +32,24 @@ a::after {
 	border-bottom: 1px dashed #0085d6;
 }
 
+.dump-info {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+
+	font-size: 1rem;
+	border: 1px solid #aaa;
+	border-radius: 100%;
+	width: 1.2em;
+	height: 1.2em;
+}
+
+.dump-info::before {
+	content: "i";
+	color: #aaa;
+}
+
 .dump-classes {
 	width: 100%;
 	max-width: 64rem;
@@ -67,11 +85,20 @@ a::after {
 }
 
 .dump-class-description {
-	margin-left: 0.5rem;
-	margin-bottom: 1rem;
+	display: flex;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
 }
 
-/* new */
+.dump-class-description-text {
+	flex: 1 0;
+	padding-right: 1rem;
+}
+
+.dump-class-description-meta {
+	flex: 0 0 auto;
+}
+
 .dump-class-member-section {
 	margin-top: 0.5rem;
 }
@@ -101,7 +128,17 @@ a::after {
 }
 
 .dump-class-member-description {
+	display: flex;
 	padding-top: 1rem;
+}
+
+.dump-class-member-description-text {
+	flex: 1 0;
+	padding-right: 1rem;
+}
+
+.dump-class-member-description-meta {
+	flex: 0 0 auto;
 }
 
 .dump-class-function-signature {

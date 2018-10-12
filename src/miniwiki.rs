@@ -6,6 +6,7 @@ use pulldown_cmark;
 
 use ::{
     dump::{
+        ContentSource,
         Dump,
         DumpClass,
         DumpClassCallback,
@@ -65,10 +66,19 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
             .child(&class.tags.join(", ")));
     }
 
-    if let Some(description) = &class.description {
-        container.add_child(tag_class("div", "dump-class-description markdown")
-            .child(markdownify(description)));
-    }
+    let description = class.description
+        .as_ref()
+        .map(String::as_str)
+        .unwrap_or(DEFAULT_DESCRIPTION);
+
+    container.add_child(tag_class("div", "dump-class-description")
+        .child(tag_class("div", "dump-class-description-text markdown")
+            .child(markdownify(description)))
+        .child(tag_class("div", "dump-class-description-meta")
+            .child(class.description_source.map(|source| {
+                tag_class("span", "dump-info")
+                    .attr("title", &format!("Content source: {}", source))
+            }))));
 
     let mut properties = tag_class("div", "dump-class-member-section-list");
     let mut functions = tag_class("div", "dump-class-member-section-list");
@@ -123,8 +133,7 @@ fn emit_property(property: &DumpClassProperty) -> HtmlTag {
                 .child(&property.name))
             .child(": ")
             .child(emit_type_link(&property.kind.name)))
-        .child(tag_class("div", "dump-class-member-description markdown")
-            .child(markdownify(description)))
+        .child(emit_member_description(description, property.description_source))
 }
 
 fn emit_function(function: &DumpClassFunction) -> HtmlTag {
@@ -156,8 +165,7 @@ fn emit_function(function: &DumpClassFunction) -> HtmlTag {
             .children(parameters)
             .child("): ")
             .child(emit_type_link(&function.return_type.name)))
-        .child(tag_class("div", "dump-class-member-description markdown")
-            .child(markdownify(description)))
+        .child(emit_member_description(description, function.description_source))
 }
 
 fn emit_event(event: &DumpClassEvent) -> HtmlTag {
@@ -169,8 +177,7 @@ fn emit_event(event: &DumpClassEvent) -> HtmlTag {
     tag_class("div", "dump-class-member")
         .child(tag_class("div", "dump-class-member-name")
             .child(&event.name))
-        .child(tag_class("div", "dump-class-member-description markdown")
-                .child(markdownify(description)))
+        .child(emit_member_description(description, event.description_source))
 }
 
 fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
@@ -182,8 +189,19 @@ fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
     tag_class("div", "dump-class-member")
         .child(tag_class("div", "dump-class-member-name")
             .child(&callback.name))
-        .child(tag_class("div", "dump-class-member-description markdown")
+        .child(emit_member_description(description, callback.description_source))
+}
+
+fn emit_member_description(description: &str, source: Option<ContentSource>) -> HtmlTag {
+    tag_class("div", "dump-class-member-description")
+        .child(tag_class("div", "dump-class-member-description-text markdown")
             .child(markdownify(description)))
+        .child(tag_class("div", "dump-class-member-meta")
+            .child(source.map(|source| {
+                tag_class("span", "dump-info")
+                    .attr("title", &format!("Content source: {}", source))
+            })))
+
 }
 
 fn emit_type_link(name: &str) -> HtmlTag {

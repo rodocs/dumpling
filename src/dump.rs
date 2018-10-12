@@ -2,6 +2,7 @@ use std::{
     fs,
     io,
     path::Path,
+    fmt,
 };
 
 use serde_json;
@@ -40,6 +41,25 @@ impl Dump {
     }
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum ContentSource {
+    ApiDump,
+    ReflectionMetadata,
+    Heuristic,
+    Supplemental,
+}
+
+impl fmt::Display for ContentSource {
+    fn fmt(&self, output: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ContentSource::ApiDump => write!(output, "JSON API Dump"),
+            ContentSource::ReflectionMetadata => write!(output, "ReflectionMetadata.xml"),
+            ContentSource::Heuristic => write!(output, "Dumpling Heuristics"),
+            ContentSource::Supplemental => write!(output, "Dumpling Supplemental"),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DumpClass {
     #[serde(rename = "Name")]
@@ -57,6 +77,10 @@ pub struct DumpClass {
     /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
+
+    /// Added by Dumpling
+    #[serde(rename = "DescriptionSource", default)]
+    pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -78,12 +102,24 @@ impl DumpClassMember {
         }
     }
 
-    pub fn set_description(&mut self, description: String) {
+    pub fn set_description(&mut self, description: String, source: ContentSource) {
         match self {
-            DumpClassMember::Property(inner) => inner.description = Some(description),
-            DumpClassMember::Function(inner) => inner.description = Some(description),
-            DumpClassMember::Event(inner) => inner.description = Some(description),
-            DumpClassMember::Callback(inner) => inner.description = Some(description),
+            DumpClassMember::Property(inner) => {
+                inner.description = Some(description);
+                inner.description_source = Some(source);
+            },
+            DumpClassMember::Function(inner) => {
+                inner.description = Some(description);
+                inner.description_source = Some(source);
+            },
+            DumpClassMember::Event(inner) => {
+                inner.description = Some(description);
+                inner.description_source = Some(source);
+            },
+            DumpClassMember::Callback(inner) => {
+                inner.description = Some(description);
+                inner.description_source = Some(source);
+            },
         }
     }
 }
@@ -102,6 +138,10 @@ pub struct DumpClassProperty {
     /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
+
+    /// Added by Dumpling
+    #[serde(rename = "DescriptionSource", default)]
+    pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -121,6 +161,10 @@ pub struct DumpClassFunction {
     /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
+
+    /// Added by Dumpling
+    #[serde(rename = "DescriptionSource", default)]
+    pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -137,6 +181,10 @@ pub struct DumpClassEvent {
     /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
+
+    /// Added by Dumpling
+    #[serde(rename = "DescriptionSource", default)]
+    pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -150,6 +198,10 @@ pub struct DumpClassCallback {
     /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
+
+    /// Added by Dumpling
+    #[serde(rename = "DescriptionSource", default)]
+    pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -163,6 +215,10 @@ pub struct DumpFunctionParameter {
     /// Added by Dumpling
     #[serde(rename = "Description")]
     pub description: Option<String>,
+
+    /// Added by Dumpling
+    #[serde(rename = "DescriptionSource", default)]
+    pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
