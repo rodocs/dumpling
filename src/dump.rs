@@ -30,6 +30,7 @@ impl From<io::Error> for DumpReadError {
 #[serde(rename_all = "PascalCase")]
 pub struct Dump {
     pub classes: Vec<DumpClass>,
+    pub enums: Vec<DumpEnum>,
 }
 
 impl Dump {
@@ -220,4 +221,18 @@ pub struct DumpFunctionParameter {
 pub struct DumpType {
     pub name: String,
     pub category: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct DumpEnum {
+    pub name: String,
+    pub items: Vec<DumpEnumItem>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct DumpEnumItem {
+    pub name: String,
+    pub value: u32,
 }
