@@ -29,16 +29,7 @@ use ::{
     reflection_metadata::ReflectionMetadata,
 };
 
-fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplemental_path: &Path) -> Dump {
-    let mut dump = Dump::read_from_file(dump_path)
-        .expect("Could not load JSON API dump");
-
-    let metadata = ReflectionMetadata::read_from_file(reflection_metadata_path)
-        .expect("Could not load ReflectionMetadata!");
-
-    let supplemental = SupplementalData::read_from_path(supplemental_path)
-        .expect("Could not load supplemental data");
-
+fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
     for class in dump.classes.iter_mut() {
         match metadata.classes.get(&class.name) {
             Some(metadata_class) => {
@@ -57,9 +48,9 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplem
             None => {},
         }
     }
+}
 
-    heuristics::camelcase_members_probably_deprecated(&mut dump);
-
+fn apply_supplemental(dump: &mut Dump, supplemental: &SupplementalData) {
     for class in dump.classes.iter_mut() {
         match supplemental.item_descriptions.get(&class.name) {
             Some(description) => {
@@ -69,6 +60,21 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplem
             None => {},
         }
     }
+}
+
+fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplemental_path: &Path) -> Dump {
+    let mut dump = Dump::read_from_file(dump_path)
+        .expect("Could not load JSON API dump");
+
+    let metadata = ReflectionMetadata::read_from_file(reflection_metadata_path)
+        .expect("Could not load ReflectionMetadata!");
+
+    let supplemental = SupplementalData::read_from_path(supplemental_path)
+        .expect("Could not load supplemental data");
+
+    apply_reflection_metadata(&mut dump, &metadata);
+    heuristics::camelcase_members_probably_deprecated(&mut dump);
+    apply_supplemental(&mut dump, &supplemental);
 
     dump
 }
