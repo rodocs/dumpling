@@ -1,8 +1,9 @@
 use std::{
+    collections::HashMap,
+    fmt,
     fs,
     io,
     path::Path,
-    fmt,
 };
 
 use serde_json;
@@ -131,6 +132,10 @@ pub struct DumpClassProperty {
     #[serde(rename = "ValueType")]
     pub kind: DumpType,
 
+    pub security: HashMap<String, String>,
+
+    pub category: String,
+
     /// Added by Dumpling
     pub description: Option<String>,
 
@@ -150,6 +155,8 @@ pub struct DumpClassFunction {
 
     pub return_type: DumpType,
 
+    pub security: String,
+
     /// Added by Dumpling
     pub description: Option<String>,
 
@@ -167,6 +174,8 @@ pub struct DumpClassEvent {
 
     pub parameters: Vec<DumpFunctionParameter>,
 
+    pub security: String,
+
     /// Added by Dumpling
     pub description: Option<String>,
 
@@ -181,6 +190,8 @@ pub struct DumpClassCallback {
 
     #[serde(default = "Vec::new")]
     pub tags: Vec<String>,
+
+    pub security: String,
 
     /// Added by Dumpling
     pub description: Option<String>,
@@ -208,4 +219,5 @@ pub struct DumpFunctionParameter {
 #[serde(rename_all = "PascalCase")]
 pub struct DumpType {
     pub name: String,
+    pub category: String,
 }
