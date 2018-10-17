@@ -132,7 +132,7 @@ fn emit_property(property: &DumpClassProperty) -> HtmlTag {
             .child(tag_class("span", "dump-class-member-name")
                 .child(&property.name))
             .child(": ")
-            .child(emit_type_link(&property.kind.name)))
+            .child(emit_type_link(&property.value_type.name)))
         .child(emit_member_description(description, property.description_source))
 }
 

@@ -31,6 +31,7 @@ impl From<io::Error> for DumpReadError {
 pub struct Dump {
     pub classes: Vec<DumpClass>,
     pub enums: Vec<DumpEnum>,
+    pub version: u32,
 }
 
 impl Dump {
@@ -130,8 +131,7 @@ pub struct DumpClassProperty {
     #[serde(default = "Vec::new")]
     pub tags: Vec<String>,
 
-    #[serde(rename = "ValueType")]
-    pub kind: DumpType,
+    pub value_type: DumpType,
 
     pub security: HashMap<String, String>,
 
