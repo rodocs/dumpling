@@ -27,8 +27,8 @@ impl From<io::Error> for DumpReadError {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct Dump {
-    #[serde(rename = "Classes")]
     pub classes: Vec<DumpClass>,
 }
 
