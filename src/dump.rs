@@ -61,25 +61,21 @@ impl fmt::Display for ContentSource {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct DumpClass {
-    #[serde(rename = "Name")]
     pub name: String,
 
-    #[serde(rename = "Members")]
     pub members: Vec<DumpClassMember>,
 
-    #[serde(rename = "Tags", default = "Vec::new")]
+    #[serde(default = "Vec::new")]
     pub tags: Vec<String>,
 
-    #[serde(rename = "Superclass")]
     pub superclass: Option<String>,
 
     /// Added by Dumpling
-    #[serde(rename = "Description")]
     pub description: Option<String>,
 
     /// Added by Dumpling
-    #[serde(rename = "DescriptionSource", default)]
     pub description_source: Option<ContentSource>,
 }
 
@@ -125,104 +121,91 @@ impl DumpClassMember {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct DumpClassProperty {
-    #[serde(rename = "Name")]
     pub name: String,
 
-    #[serde(rename = "Tags", default = "Vec::new")]
+    #[serde(default = "Vec::new")]
     pub tags: Vec<String>,
 
     #[serde(rename = "ValueType")]
     pub kind: DumpType,
 
     /// Added by Dumpling
-    #[serde(rename = "Description")]
     pub description: Option<String>,
 
     /// Added by Dumpling
-    #[serde(rename = "DescriptionSource", default)]
     pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct DumpClassFunction {
-    #[serde(rename = "Name")]
     pub name: String,
 
-    #[serde(rename = "Tags", default = "Vec::new")]
+    #[serde(default = "Vec::new")]
     pub tags: Vec<String>,
 
-    #[serde(rename = "Parameters")]
     pub parameters: Vec<DumpFunctionParameter>,
 
-    #[serde(rename = "ReturnType")]
     pub return_type: DumpType,
 
     /// Added by Dumpling
-    #[serde(rename = "Description")]
     pub description: Option<String>,
 
     /// Added by Dumpling
-    #[serde(rename = "DescriptionSource", default)]
     pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct DumpClassEvent {
-    #[serde(rename = "Name")]
     pub name: String,
 
-    #[serde(rename = "Tags", default = "Vec::new")]
+    #[serde(default = "Vec::new")]
     pub tags: Vec<String>,
 
-    #[serde(rename = "Parameters")]
     pub parameters: Vec<DumpFunctionParameter>,
 
     /// Added by Dumpling
-    #[serde(rename = "Description")]
     pub description: Option<String>,
 
     /// Added by Dumpling
-    #[serde(rename = "DescriptionSource", default)]
     pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct DumpClassCallback {
-    #[serde(rename = "Name")]
     pub name: String,
 
-    #[serde(rename = "Tags", default = "Vec::new")]
+    #[serde(default = "Vec::new")]
     pub tags: Vec<String>,
 
     /// Added by Dumpling
-    #[serde(rename = "Description")]
     pub description: Option<String>,
 
     /// Added by Dumpling
-    #[serde(rename = "DescriptionSource", default)]
     pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct DumpFunctionParameter {
-    #[serde(rename = "Name")]
     pub name: String,
 
     #[serde(rename = "Type")]
     pub kind: DumpType,
 
     /// Added by Dumpling
-    #[serde(rename = "Description")]
     pub description: Option<String>,
 
     /// Added by Dumpling
-    #[serde(rename = "DescriptionSource", default)]
     pub description_source: Option<ContentSource>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct DumpType {
-    #[serde(rename = "Name")]
     pub name: String,
 }
