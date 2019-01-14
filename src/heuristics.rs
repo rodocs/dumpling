@@ -1,7 +1,7 @@
 //! Contains heuristics to guess at and clean up content sourced from outside
 //! Dumping itself.
 
-use ::{
+use crate::{
     dump::{ContentSource, Dump},
 };
 

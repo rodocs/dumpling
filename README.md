@@ -22,26 +22,26 @@ The Roblox JSON API dump, which can be produced via a Roblox Studio binary:
 RobloxStudioBeta.exe -API dump.json
 ```
 
-Roblox's `ReflectionMetadata.xml`, which can be pulled out of a Roblox installation
+Roblox's `ReflectionMetadata.xml`, which can be pulled out of a Roblox installation.
 
-A 'supplemental content' directory. This repository includes one, located in the `supplemental` directory.
+A user content directory. This repository includes one, located in the `content` directory.
 
 ### Megadump
 Megadump generates a JSON API dump with extra information attached. You can use this as the foundation for your own API reference or other tools that want to consume API information.
 
 ```sh
-cargo run -- megadump --dump dump.json --metadata ReflectionMetadata.xml --supplemental supplemental > megadump.json
+cargo run -- megadump --dump dump.json --metadata ReflectionMetadata.xml --content content -o megadump.json
 ```
 
 ### Miniwiki
-Miniwiki generates a single page, offline-capable, miniature API reference. It's intended as an example of the information contained in Dumpling.
+Miniwiki generates a single page, offline-accessible, miniature API reference. It's intended as an example of the information contained in Dumpling.
 
 ```sh
-cargo run -- miniwiki --dump dump.json --metadata ReflectionMetadata.xml --supplemental supplemental > miniwiki.html
+cargo run -- miniwiki --dump dump.json --metadata ReflectionMetadata.xml --content content -o miniwiki.html
 ```
 
 ## Requirements
-* Rust 1.29+
+* Rust 1.31+
 
 ## License
 Dumpling is available under the terms of the Mozilla Public License, Version 2.0. See [LICENSE](LICENSE) for details.

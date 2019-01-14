@@ -6,7 +6,7 @@ use std::{
     path::Path,
 };
 
-use serde_json;
+use serde_derive::{Serialize, Deserialize};
 
 #[derive(Debug)]
 pub enum DumpReadError {

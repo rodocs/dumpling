@@ -4,7 +4,7 @@ use std::{
 
 use pulldown_cmark;
 
-use ::{
+use crate::{
     dump::{
         ContentSource,
         Dump,

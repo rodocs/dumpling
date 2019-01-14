@@ -1,13 +1,3 @@
-#[macro_use] extern crate serde_derive;
-#[macro_use] extern crate lazy_static;
-
-extern crate clap;
-extern crate pulldown_cmark;
-extern crate quick_xml;
-extern crate serde;
-extern crate serde_json;
-extern crate toml;
-
 pub mod dump;
 pub mod miniwiki;
 pub mod supplement;
@@ -15,7 +5,10 @@ pub mod templating;
 pub mod reflection_metadata;
 pub mod heuristics;
 
-use std::path::Path;
+use std::{
+    fs,
+    path::Path,
+};
 
 use clap::{
     App,
@@ -23,7 +16,7 @@ use clap::{
     Arg,
 };
 
-use ::{
+use crate::{
     dump::{Dump, ContentSource},
     supplement::SupplementalData,
     reflection_metadata::ReflectionMetadata,
@@ -50,9 +43,9 @@ fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
     }
 }
 
-fn apply_supplemental(dump: &mut Dump, supplemental: &SupplementalData) {
+fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
     for class in dump.classes.iter_mut() {
-        match supplemental.item_descriptions.get(&class.name) {
+        match content.item_descriptions.get(&class.name) {
             Some(description) => {
                 class.description = Some(description.prose.clone());
                 class.description_source = Some(ContentSource::Supplemental);
@@ -62,39 +55,56 @@ fn apply_supplemental(dump: &mut Dump, supplemental: &SupplementalData) {
     }
 }
 
-fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, supplemental_path: &Path) -> Dump {
+fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, content_path: &Path) -> Dump {
     let mut dump = Dump::read_from_file(dump_path)
         .expect("Could not load JSON API dump");
 
     let metadata = ReflectionMetadata::read_from_file(reflection_metadata_path)
         .expect("Could not load ReflectionMetadata!");
 
-    let supplemental = SupplementalData::read_from_path(supplemental_path)
-        .expect("Could not load supplemental data");
+    let content = SupplementalData::read_from_path(content_path)
+        .expect("Could not load content data");
 
     apply_reflection_metadata(&mut dump, &metadata);
     heuristics::camelcase_members_probably_deprecated(&mut dump);
-    apply_supplemental(&mut dump, &supplemental);
+    apply_supplemental(&mut dump, &content);
 
     dump
 }
 
-fn miniwiki(dump_path: &Path, metadata_path: &Path, supplemental_path: &Path) {
-    let dump = load_combined_dump(dump_path, metadata_path, supplemental_path);
-
-    let mut output = String::new();
-    miniwiki::emit_wiki(&dump, &mut output).unwrap();
-
-    println!("{}", output);
+struct MiniwikiOptions<'a> {
+    output_path: &'a Path,
+    dump_path: &'a Path,
+    metadata_path: &'a Path,
+    content_path: &'a Path,
 }
 
-fn megadump(dump_path: &Path, metadata_path: &Path, supplemental_path: &Path) {
-    let dump = load_combined_dump(dump_path, metadata_path, supplemental_path);
+fn miniwiki(options: &MiniwikiOptions) {
+    let dump = load_combined_dump(options.dump_path, options.metadata_path, options.content_path);
+
+    let mut output = String::new();
+    miniwiki::emit_wiki(&dump, &mut output)
+        .expect("Could not generate Miniwiki");
+
+    fs::write(options.output_path, &output)
+        .expect("Could not write to output file");
+}
+
+struct MegadumpOptions<'a> {
+    output_path: &'a Path,
+    dump_path: &'a Path,
+    metadata_path: &'a Path,
+    content_path: &'a Path,
+}
+
+fn megadump(options: &MegadumpOptions) {
+    let dump = load_combined_dump(options.dump_path, options.metadata_path, options.content_path);
 
     let output = serde_json::to_string(&dump)
         .expect("Could not convert dump to JSON");
 
-    println!("{}", output);
+    fs::write(options.output_path, &output)
+        .expect("Could not write to output file");
 }
 
 fn main() {
@@ -110,9 +120,16 @@ fn main() {
         .required(true)
         .takes_value(true);
 
-    let supplemental_arg = Arg::with_name("supplemental")
-        .long("supplemental")
+    let content_arg = Arg::with_name("content")
+        .long("content")
         .help("The location of the Roblox supplementary data")
+        .required(true)
+        .takes_value(true);
+
+    let output_arg = Arg::with_name("output")
+        .long("output")
+        .short("o")
+        .help("Where to output the resulting file")
         .required(true)
         .takes_value(true);
 
@@ -125,32 +142,46 @@ fn main() {
             .about("Generate a simple, single-page mini Roblox wiki")
             .arg(dump_arg.clone())
             .arg(metadata_arg.clone())
-            .arg(supplemental_arg.clone()))
+            .arg(content_arg.clone())
+            .arg(output_arg.clone()))
 
         .subcommand(SubCommand::with_name("megadump")
             .about("Create an API dump file with additional data")
             .arg(dump_arg.clone())
             .arg(metadata_arg.clone())
-            .arg(supplemental_arg.clone()))
+            .arg(content_arg.clone())
+            .arg(output_arg.clone()))
 
         .get_matches();
 
     match matches.subcommand() {
         ("miniwiki", command_matches) => {
             let command_matches = command_matches.unwrap();
+            let output_path = Path::new(command_matches.value_of("output").unwrap());
             let dump_path = Path::new(command_matches.value_of("dump").unwrap());
             let metadata_path = Path::new(command_matches.value_of("metadata").unwrap());
-            let supplemental_path = Path::new(command_matches.value_of("supplemental").unwrap());
+            let content_path = Path::new(command_matches.value_of("content").unwrap());
 
-            miniwiki(dump_path, metadata_path, supplemental_path);
+            miniwiki(&MiniwikiOptions {
+                output_path,
+                dump_path,
+                metadata_path,
+                content_path,
+            });
         },
         ("megadump", command_matches) => {
             let command_matches = command_matches.unwrap();
+            let output_path = Path::new(command_matches.value_of("output").unwrap());
             let dump_path = Path::new(command_matches.value_of("dump").unwrap());
             let metadata_path = Path::new(command_matches.value_of("metadata").unwrap());
-            let supplemental_path = Path::new(command_matches.value_of("supplemental").unwrap());
+            let content_path = Path::new(command_matches.value_of("content").unwrap());
 
-            megadump(dump_path, metadata_path, supplemental_path);
+            megadump(&MegadumpOptions {
+                output_path,
+                dump_path,
+                metadata_path,
+                content_path,
+            });
         },
         _ => eprintln!("{}", matches.usage()),
     }

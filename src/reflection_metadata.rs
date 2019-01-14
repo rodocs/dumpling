@@ -17,6 +17,8 @@ use quick_xml::{
     },
 };
 
+use lazy_static::lazy_static;
+
 struct XmlQuery {
     pieces: Vec<(&'static str, Vec<(&'static str, &'static str)>)>,
 }
@@ -48,7 +50,7 @@ impl XmlQuery {
             }
 
             if expected_attributes.len() > 0 {
-                let mut element_attributes = extract_attributes(reader, element.attributes());
+                let element_attributes = extract_attributes(reader, element.attributes());
 
                 for (key, expected_value) in expected_attributes {
                     match element_attributes.get(*key) {
