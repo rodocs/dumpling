@@ -1,8 +1,0 @@
-/target
-**/*.rs.bk
-
-# Test data
-/dump.json
-/miniwiki.html
-/megadump.json
-/ReflectionMetadata.xml
