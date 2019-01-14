@@ -9,7 +9,7 @@ Dumpling aggregates a bunch of data:
 
 Dumpling produces easily consumed JSON in the same structure as the current Roblox JSON API dump, meaning it's pretty close to a drop-in replacement!
 
-It can also produce a single file, offline-accesible miniature Roblox API reference that can be used to verify its content.
+It can also produce a single file, offline-accesible miniature Roblox API reference that can be used to verify its content. A version of this is hosted via [GitHub pages here](https://lpghatguy.github.io/dumpling/).
 
 ## Usage
 Dumpling has two modes to demonstrate its functionality: Megadump, and Miniwiki.
