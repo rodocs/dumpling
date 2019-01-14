@@ -87,7 +87,7 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
 
     for member in &class.members {
         match member {
-            DumpClassMember::Property(property) => properties.add_child(emit_property(property)),
+            DumpClassMember::Property(property) => properties.add_child(emit_property(property, &class.name)),
             DumpClassMember::Function(function) => functions.add_child(emit_function(function)),
             DumpClassMember::Event(event) => events.add_child(emit_event(event)),
             DumpClassMember::Callback(callback) => callbacks.add_child(emit_callback(callback)),
@@ -121,13 +121,19 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
     container
 }
 
-fn emit_property(property: &DumpClassProperty) -> HtmlTag {
+fn emit_property(property: &DumpClassProperty, parent_name: &str) -> HtmlTag {
     let description = property.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
+    let qualified_name = format!("{}.{}", parent_name, property.name);
+
     tag_class("div", "dump-class-member")
+        .attr("id", &qualified_name)
+        .child(tag_class("a", "dump-class-member-anchor")
+            .attr("href", &format!("#{}", qualified_name))
+            .child("#"))
         .child(tag("span")
             .child(tag_class("span", "dump-class-member-name")
                 .child(&property.name))

@@ -99,6 +99,12 @@ a::after {
 	flex: 0 0 auto;
 }
 
+.dump-class-member-anchor {
+	font-weight: bold;
+	font-family: monospace;
+	margin-right: 0.5em;
+}
+
 .dump-class-member-section {
 	margin-top: 0.5rem;
 }
