@@ -3,6 +3,7 @@ use std::{
 };
 
 use pulldown_cmark;
+use snax::{snax, HtmlContent as SnaxHtmlContent};
 
 use crate::{
     dump::{
@@ -210,8 +211,14 @@ fn emit_member_description(description: &str, source: Option<ContentSource>) -> 
 
 }
 
-fn emit_type_link(name: &str) -> HtmlTag {
-    tag("a")
-        .attr("href", &format!("#{}", name))
-        .child(name)
+fn render_type_link(name: &str) -> SnaxHtmlContent {
+    snax!(
+        <a href={ format!("#{}", name) }>
+            { name.to_string() }
+        </a>
+    )
+}
+
+fn emit_type_link(name: &str) -> HtmlContent {
+    HtmlContent::Raw(render_type_link(name).to_string())
 }
