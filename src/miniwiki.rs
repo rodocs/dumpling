@@ -23,6 +23,14 @@ static STYLE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resource
 
 static DEFAULT_DESCRIPTION: &str = "*No description available.*";
 
+fn render_markdown(input: &str) -> SnaxHtmlContent {
+    let parser = pulldown_cmark::Parser::new(input);
+    let mut output = String::new();
+    pulldown_cmark::html::push_html(&mut output, parser);
+
+    UnescapedText::new(output).into()
+}
+
 fn markdownify(input: &str) -> HtmlContent {
     let parser = pulldown_cmark::Parser::new(input);
     let mut output = String::new();
@@ -203,16 +211,23 @@ fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
         .child(emit_member_description(description, callback.description_source))
 }
 
-fn emit_member_description(description: &str, source: Option<ContentSource>) -> HtmlTag {
-    tag_class("div", "dump-class-member-description")
-        .child(tag_class("div", "dump-class-member-description-text markdown")
-            .child(markdownify(description)))
-        .child(tag_class("div", "dump-class-member-meta")
-            .child(source.map(|source| {
-                tag_class("span", "dump-info")
-                    .attr("title", &format!("Content source: {}", source))
-            })))
+fn render_member_description(description: &str, source: Option<ContentSource>) -> SnaxHtmlContent {
+    snax!(
+        <div class="dump-class-member-description">
+            <div class="dump-class-member-description-text markdown">
+                { render_markdown(description) }
+            </div>
+            <div class="dump-class-member-meta">
+                { Fragment::new(source.map(|source| snax!(
+                    <span class="dump-info" title={ format!("Content source: {}", source) } />
+                ))) }
+            </div>
+        </div>
+    )
+}
 
+fn emit_member_description(description: &str, source: Option<ContentSource>) -> HtmlContent {
+    HtmlContent::Raw(render_member_description(description, source).to_string())
 }
 
 fn render_type_link(name: &str) -> SnaxHtmlContent {

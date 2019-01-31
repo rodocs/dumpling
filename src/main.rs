@@ -1,3 +1,5 @@
+#![recursion_limit="128"]
+
 pub mod dump;
 pub mod miniwiki;
 pub mod supplement;
