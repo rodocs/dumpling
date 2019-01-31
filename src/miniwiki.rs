@@ -3,7 +3,7 @@ use std::{
 };
 
 use pulldown_cmark;
-use snax::{snax, HtmlContent as SnaxHtmlContent};
+use snax::{snax, UnescapedText, HtmlContent as SnaxHtmlContent, Fragment};
 
 use crate::{
     dump::{
@@ -34,16 +34,20 @@ fn markdownify(input: &str) -> HtmlContent {
 pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
 
-    let html = tag("html")
-        .child(tag("head")
-            // Templating system doesn't do self-closing tags yet
-            .child(HtmlContent::Raw("<meta charset=\"utf-8\" />".to_string()))
-            .child(HtmlContent::Raw("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,shrink-to-fit=no\" />".to_string()))
-            .child(tag("title").child("Dumpling"))
-            .child(tag("style").child(STYLE)))
-        .child(tag("body")
-            .child(tag_class("div", "dump-classes")
-                .children(dump.classes.iter().map(emit_class))));
+    let html = snax!(
+        <html>
+            <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no" />
+                <style>{ STYLE }</style>
+            </head>
+            <body>
+                <div class="dump-classes">
+                    { Fragment::new(dump.classes.iter().map(emit_class).map(|v| UnescapedText::new(v.to_string()))) }
+                </div>
+            </body>
+        </html>
+    );
 
     write!(output, "{}", html)
 }

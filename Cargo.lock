@@ -258,7 +258,7 @@ dependencies = [
 [[package]]
 name = "snax"
 version = "0.1.0"
-source = "git+https://github.com/LPGhatguy/snax.git#0e394a86f353b53985b6c2141f97b4becf575093"
+source = "git+https://github.com/LPGhatguy/snax.git#1db5d19305aeebb1a7b612b29f3946193c04a3cd"
 dependencies = [
  "htmlescape 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "maplit 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -269,7 +269,7 @@ dependencies = [
 [[package]]
 name = "snax_macros"
 version = "0.1.0"
-source = "git+https://github.com/LPGhatguy/snax.git#0e394a86f353b53985b6c2141f97b4becf575093"
+source = "git+https://github.com/LPGhatguy/snax.git#1db5d19305aeebb1a7b612b29f3946193c04a3cd"
 dependencies = [
  "proc-macro-hack 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)",
