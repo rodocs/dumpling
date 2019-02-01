@@ -1,4 +1,4 @@
-#![recursion_limit="128"]
+#![recursion_limit="1024"]
 
 pub mod dump;
 pub mod miniwiki;
