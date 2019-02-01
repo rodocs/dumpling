@@ -134,7 +134,7 @@ fn emit_class(class: &DumpClass) -> HtmlTag {
     container
 }
 
-fn emit_property(property: &DumpClassProperty, parent_name: &str) -> HtmlTag {
+fn render_property(property: &DumpClassProperty, parent_name: &str) -> SnaxHtmlContent {
     let description = property.description
         .as_ref()
         .map(String::as_str)
@@ -142,17 +142,23 @@ fn emit_property(property: &DumpClassProperty, parent_name: &str) -> HtmlTag {
 
     let qualified_name = format!("{}.{}", parent_name, property.name);
 
-    tag_class("div", "dump-class-member")
-        .attr("id", &qualified_name)
-        .child(tag_class("a", "dump-class-member-anchor")
-            .attr("href", &format!("#{}", qualified_name))
-            .child("#"))
-        .child(tag("span")
-            .child(tag_class("span", "dump-class-member-name")
-                .child(&property.name))
-            .child(": ")
-            .child(emit_type_link(&property.value_type.name)))
-        .child(emit_member_description(description, property.description_source))
+    snax!(
+        <div class="dump-class-member" id={ qualified_name.clone() }>
+            <a class="dump-class-member-anchor" href={ format!("#{}", qualified_name) }>
+                "#"
+            </a>
+            <span>
+                <span class="dump-class-member-name">{ property.name.to_owned() }</span>
+                ": "
+                { render_type_link(&property.value_type.name) }
+            </span>
+            { render_member_description(description, property.description_source) }
+        </div>
+    )
+}
+
+fn emit_property(property: &DumpClassProperty, parent_name: &str) -> HtmlContent {
+    HtmlContent::Raw(render_property(property, parent_name).to_string())
 }
 
 fn render_function(function: &DumpClassFunction) -> SnaxHtmlContent {
