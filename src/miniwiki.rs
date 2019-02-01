@@ -60,6 +60,22 @@ pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
     write!(output, "{}", html)
 }
 
+fn render_class(class: &DumpClass) -> SnaxHtmlContent {
+    snax!(
+        <div class="dump-class">
+            <a class="dump-class-title" id={ class.name.to_owned() } href={ format!("#{}", class.name) }>
+                { class.name.to_owned() }
+            </a>
+            { class.superclass.as_ref().map(|superclass| snax!(
+                <p class="dump-class-inherits">
+                    "Inherits: "
+                    { render_type_link(&superclass) }
+                </p>
+            )) }
+        </div>
+    )
+}
+
 fn emit_class(class: &DumpClass) -> HtmlTag {
     let mut container = tag_class("div", "dump-class")
         .child(tag_class("a", "dump-class-title")
@@ -188,7 +204,9 @@ fn render_function(function: &DumpClassFunction) -> SnaxHtmlContent {
     snax!(
         <div class="dump-class-member">
             <div class="dump-class-function-signature">
-                <span class="dump-class-member-name">{ function.name.to_owned() }</span>
+                <span class="dump-class-member-name">
+                    { function.name.to_owned() }
+                </span>
                 "("
                 { Fragment::new(parameters) }
                 "): "
