@@ -82,6 +82,52 @@ pub struct DumpClass {
     pub description_source: Option<ContentSource>,
 }
 
+impl DumpClass {
+    pub fn properties(&self) -> impl Iterator<Item = &DumpClassProperty> {
+        self.members.iter().filter_map(|member| match member {
+            DumpClassMember::Property(inner) => Some(inner),
+            _ => None,
+        })
+    }
+
+    pub fn has_properties(&self) -> bool {
+        self.properties().next().is_some()
+    }
+
+    pub fn functions(&self) -> impl Iterator<Item = &DumpClassFunction> {
+        self.members.iter().filter_map(|member| match member {
+            DumpClassMember::Function(inner) => Some(inner),
+            _ => None,
+        })
+    }
+
+    pub fn has_functions(&self) -> bool {
+        self.functions().next().is_some()
+    }
+
+    pub fn events(&self) -> impl Iterator<Item = &DumpClassEvent> {
+        self.members.iter().filter_map(|member| match member {
+            DumpClassMember::Event(inner) => Some(inner),
+            _ => None,
+        })
+    }
+
+    pub fn has_events(&self) -> bool {
+        self.events().next().is_some()
+    }
+
+    pub fn callbacks(&self) -> impl Iterator<Item = &DumpClassCallback> {
+        self.members.iter().filter_map(|member| match member {
+            DumpClassMember::Callback(inner) => Some(inner),
+            _ => None,
+        })
+    }
+
+    pub fn has_callbacks(&self) -> bool {
+        self.callbacks().next().is_some()
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "MemberType")]
 pub enum DumpClassMember {
