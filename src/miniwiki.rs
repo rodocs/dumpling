@@ -155,7 +155,7 @@ fn emit_property(property: &DumpClassProperty, parent_name: &str) -> HtmlTag {
         .child(emit_member_description(description, property.description_source))
 }
 
-fn emit_function(function: &DumpClassFunction) -> HtmlTag {
+fn render_function(function: &DumpClassFunction) -> SnaxHtmlContent {
     let description = function.description
         .as_ref()
         .map(String::as_str)
@@ -164,51 +164,77 @@ fn emit_function(function: &DumpClassFunction) -> HtmlTag {
     let parameters = function.parameters
         .iter()
         .enumerate()
-        .map(|(index, param)| {
-            let mut parameter = tag_class("div", "dump-function-argument")
-                .child(&param.name)
-                .child(": ")
-                .child(emit_type_link(&param.kind.name));
+        .map(|(index, param)| snax!(
+            <div class="dump-function-argument">
+                { param.name.to_owned() }
+                ": "
+                { render_type_link(&param.kind.name) }
+                {
+                    if index < function.parameters.len() - 1 {
+                        ",".into()
+                    } else {
+                        SnaxHtmlContent::None
+                    }
+                }
+            </div>
+        ));
 
-            if index < function.parameters.len() - 1 {
-                parameter.add_child(", ");
-            }
-
-            parameter
-        });
-
-    tag_class("div", "dump-class-member")
-        .child(tag_class("div", "dump-class-function-signature")
-            .child(tag_class("span", "dump-class-member-name").child(&function.name))
-            .child("(")
-            .children(parameters)
-            .child("): ")
-            .child(emit_type_link(&function.return_type.name)))
-        .child(emit_member_description(description, function.description_source))
+    snax!(
+        <div class="dump-class-member">
+            <div class="dump-class-function-signature">
+                <span class="dump-class-member-name">{ function.name.to_owned() }</span>
+                "("
+                { Fragment::new(parameters) }
+                "): "
+                { render_type_link(&function.return_type.name) }
+            </div>
+            { render_member_description(description, function.description_source) }
+        </div>
+    )
 }
 
-fn emit_event(event: &DumpClassEvent) -> HtmlTag {
+fn emit_function(function: &DumpClassFunction) -> HtmlContent {
+    HtmlContent::Raw(render_function(function).to_string())
+}
+
+fn render_event(event: &DumpClassEvent) -> SnaxHtmlContent {
     let description = event.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    tag_class("div", "dump-class-member")
-        .child(tag_class("div", "dump-class-member-name")
-            .child(&event.name))
-        .child(emit_member_description(description, event.description_source))
+    snax!(
+        <div class="dump-class-member">
+            <div class="dump-class-member-name">
+                { event.name.to_owned() }
+            </div>
+            { render_member_description(description, event.description_source) }
+        </div>
+    )
 }
 
-fn emit_callback(callback: &DumpClassCallback) -> HtmlTag {
+fn emit_event(event: &DumpClassEvent) -> HtmlContent {
+    HtmlContent::Raw(render_event(event).to_string())
+}
+
+fn render_callback(callback: &DumpClassCallback) -> SnaxHtmlContent {
     let description = callback.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    tag_class("div", "dump-class-member")
-        .child(tag_class("div", "dump-class-member-name")
-            .child(&callback.name))
-        .child(emit_member_description(description, callback.description_source))
+    snax!(
+        <div class="dump-class-member">
+            <div class="dump-class-member-name">
+                { callback.name.to_owned() }
+            </div>
+            { render_member_description(description, callback.description_source) }
+        </div>
+    )
+}
+
+fn emit_callback(callback: &DumpClassCallback) -> HtmlContent {
+    HtmlContent::Raw(render_callback(callback).to_string())
 }
 
 fn render_member_description(description: &str, source: Option<ContentSource>) -> SnaxHtmlContent {
