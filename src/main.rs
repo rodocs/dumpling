@@ -3,7 +3,6 @@
 pub mod dump;
 pub mod miniwiki;
 pub mod supplement;
-pub mod templating;
 pub mod reflection_metadata;
 pub mod heuristics;
 
