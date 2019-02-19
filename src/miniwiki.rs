@@ -3,7 +3,7 @@ use std::{
 };
 
 use pulldown_cmark;
-use snax::{snax, UnescapedText, HtmlContent, Fragment};
+use ritz::{html, UnescapedText, HtmlContent, Fragment};
 
 use crate::{
     dump::{
@@ -32,7 +32,7 @@ fn render_markdown(input: &str) -> HtmlContent {
 pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
 
-    let html = snax!(
+    let html = html!(
         <html>
             <head>
                 <meta charset="utf-8" />
@@ -56,13 +56,13 @@ fn render_class(class: &DumpClass) -> HtmlContent {
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    snax!(
+    html!(
         <div class="dump-class">
             <a class="dump-class-title" id={ &class.name } href={ format!("#{}", class.name) }>
                 { &class.name }
             </a>
 
-            { class.superclass.as_ref().map(|superclass| snax!(
+            { class.superclass.as_ref().map(|superclass| html!(
                 <p class="dump-class-inherits">
                     "Inherits: "
                     { render_type_link(&superclass) }
@@ -70,7 +70,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
             )) }
 
             { if class.tags.len() > 0 {
-                snax!(
+                html!(
                      <p class="dump-class-tags">
                         "Tags: "
                         { class.tags.join(", ") }
@@ -85,14 +85,14 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     { render_markdown(description) }
                 </div>
                 <div class="dump-class-description-meta">
-                    { class.description_source.map(|source| snax!(
+                    { class.description_source.map(|source| html!(
                         <span class="dump-info" title={ format!("Content source: {}", source) } />
                     )) }
                 </div>
             </div>
 
             { if class.has_properties() {
-                snax!(
+                html!(
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Properties"</div>
                         <div class="dump-class-member-section-list">
@@ -105,7 +105,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
             } }
 
             { if class.has_functions() {
-                snax!(
+                html!(
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Functions"</div>
                         <div class="dump-class-member-section-list">
@@ -118,7 +118,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
             } }
 
             { if class.has_events() {
-                snax!(
+                html!(
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Events"</div>
                         <div class="dump-class-member-section-list">
@@ -131,7 +131,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
             } }
 
             { if class.has_callbacks() {
-                snax!(
+                html!(
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Callbacks"</div>
                         <div class="dump-class-member-section-list">
@@ -154,7 +154,7 @@ fn render_property<'a>(property: &'a DumpClassProperty, parent_name: &str) -> Ht
 
     let qualified_name = format!("{}.{}", parent_name, property.name);
 
-    snax!(
+    html!(
         <div class="dump-class-member" id={ qualified_name.clone() }>
             <a class="dump-class-member-anchor" href={ format!("#{}", qualified_name) }>
                 "#"
@@ -178,7 +178,7 @@ fn render_function(function: &DumpClassFunction) -> HtmlContent {
     let parameters = function.parameters
         .iter()
         .enumerate()
-        .map(|(index, param)| snax!(
+        .map(|(index, param)| html!(
             <div class="dump-function-argument">
                 { &param.name }
                 ": "
@@ -193,7 +193,7 @@ fn render_function(function: &DumpClassFunction) -> HtmlContent {
             </div>
         ));
 
-    snax!(
+    html!(
         <div class="dump-class-member">
             <div class="dump-class-function-signature">
                 <span class="dump-class-member-name">
@@ -215,7 +215,7 @@ fn render_event(event: &DumpClassEvent) -> HtmlContent {
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    snax!(
+    html!(
         <div class="dump-class-member">
             <div class="dump-class-member-name">
                 { &event.name }
@@ -231,7 +231,7 @@ fn render_callback(callback: &DumpClassCallback) -> HtmlContent {
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    snax!(
+    html!(
         <div class="dump-class-member">
             <div class="dump-class-member-name">
                 { &callback.name }
@@ -242,13 +242,13 @@ fn render_callback(callback: &DumpClassCallback) -> HtmlContent {
 }
 
 fn render_member_description(description: &str, source: Option<ContentSource>) -> HtmlContent {
-    snax!(
+    html!(
         <div class="dump-class-member-description">
             <div class="dump-class-member-description-text markdown">
                 { render_markdown(description) }
             </div>
             <div class="dump-class-member-meta">
-                { Fragment::new(source.map(|source| snax!(
+                { Fragment::new(source.map(|source| html!(
                     <span class="dump-info" title={ format!("Content source: {}", source) } />
                 ))) }
             </div>
@@ -257,7 +257,7 @@ fn render_member_description(description: &str, source: Option<ContentSource>) -
 }
 
 fn render_type_link(name: &str) -> HtmlContent {
-    snax!(
+    html!(
         <a href={ format!("#{}", name) }>
             { name }
         </a>
