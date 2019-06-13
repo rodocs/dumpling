@@ -4,6 +4,7 @@ Dumpling is a tool to combine Roblox's JSON API dump with user-authored descript
 Dumpling aggregates a bunch of data:
 * Roblox JSON API dump
 * ReflectionMetadata.xml
+* Roblox Developer Hub
 * Hand-crafted heuristics
 * Community-authored descriptions
 

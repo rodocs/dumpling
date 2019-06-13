@@ -1,10 +1,12 @@
 #![recursion_limit="1024"]
 
+pub mod devhub;
 pub mod dump;
-pub mod miniwiki;
-pub mod supplement;
-pub mod reflection_metadata;
+pub mod dump_devhub;
 pub mod heuristics;
+pub mod miniwiki;
+pub mod reflection_metadata;
+pub mod supplement;
 
 use std::{
     fs,
@@ -21,6 +23,7 @@ use crate::{
     dump::{Dump, ContentSource},
     supplement::SupplementalData,
     reflection_metadata::ReflectionMetadata,
+    dump_devhub::DevHubData,
 };
 
 fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
@@ -46,12 +49,24 @@ fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
 
 fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
     for class in dump.classes.iter_mut() {
-        match content.item_descriptions.get(&class.name) {
-            Some(description) => {
-                class.description = Some(description.prose.clone());
-                class.description_source = Some(ContentSource::Supplemental);
-            },
-            None => {},
+        // TODO: Apply descriptions for instance members too
+        if let Some(description) = content.item_descriptions.get(&class.name) {
+            class.description = Some(description.prose.clone());
+            class.description_source = Some(ContentSource::Supplemental);
+        }
+    }
+}
+
+fn apply_devhub(dump: &mut Dump, content: &DevHubData) {
+    for class in content.classes.values() {
+        if let Some(dump_class) = dump.classes.iter_mut().find(|item| item.name == class.name) {
+            dump_class.description = Some(class.description.clone());
+
+            for property in &class.properties {
+                if let Some(dump_member) = dump_class.properties_mut().find(|item| item.name == property.name) {
+                    dump_member.description = Some(property.description.clone());
+                }
+            }
         }
     }
 }
@@ -66,8 +81,11 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, content
     let content = SupplementalData::read_from_path(content_path)
         .expect("Could not load content data");
 
+    let devhub_data = DevHubData::fetch(&dump);
+
     apply_reflection_metadata(&mut dump, &metadata);
     heuristics::camelcase_members_probably_deprecated(&mut dump);
+    apply_devhub(&mut dump, &devhub_data);
     apply_supplemental(&mut dump, &content);
 
     dump

@@ -48,6 +48,7 @@ impl Dump {
 pub enum ContentSource {
     ApiDump,
     ReflectionMetadata,
+    DevHub,
     Heuristic,
     Supplemental,
 }
@@ -57,6 +58,7 @@ impl fmt::Display for ContentSource {
         match self {
             ContentSource::ApiDump => write!(output, "JSON API Dump"),
             ContentSource::ReflectionMetadata => write!(output, "ReflectionMetadata.xml"),
+            ContentSource::DevHub => write!(output, "Roblox Developer Hub"),
             ContentSource::Heuristic => write!(output, "Dumpling Heuristics"),
             ContentSource::Supplemental => write!(output, "Dumpling Supplemental"),
         }
@@ -85,6 +87,13 @@ pub struct DumpClass {
 impl DumpClass {
     pub fn properties(&self) -> impl Iterator<Item = &DumpClassProperty> {
         self.members.iter().filter_map(|member| match member {
+            DumpClassMember::Property(inner) => Some(inner),
+            _ => None,
+        })
+    }
+
+    pub fn properties_mut(&mut self) -> impl Iterator<Item = &mut DumpClassProperty> {
+        self.members.iter_mut().filter_map(|member| match member {
             DumpClassMember::Property(inner) => Some(inner),
             _ => None,
         })
