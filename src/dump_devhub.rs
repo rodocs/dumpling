@@ -58,7 +58,7 @@ fn instance_page_to_class(page: &devhub::InstancePage) -> DevHubClass {
 
     for property in &class.property {
         properties.push(DevHubProperty {
-            name: property.title.clone(),
+            name: property.display_title.clone(),
             description: property.description.as_ref().map(|v| v.clone()).unwrap_or_else(String::new),
         });
     }

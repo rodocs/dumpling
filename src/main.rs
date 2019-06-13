@@ -58,13 +58,14 @@ fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
 }
 
 fn apply_devhub(dump: &mut Dump, content: &DevHubData) {
-    for class in content.classes.values() {
-        if let Some(dump_class) = dump.classes.iter_mut().find(|item| item.name == class.name) {
-            dump_class.description = Some(class.description.clone());
+    for devhub_class in content.classes.values() {
+        if let Some(dump_class) = dump.classes.iter_mut().find(|item| item.name == devhub_class.name) {
+            dump_class.description = Some(devhub_class.description.clone());
 
-            for property in &class.properties {
+            for property in &devhub_class.properties {
                 if let Some(dump_member) = dump_class.properties_mut().find(|item| item.name == property.name) {
                     dump_member.description = Some(property.description.clone());
+                    dump_member.description_source = Some(ContentSource::DevHub);
                 }
             }
         }

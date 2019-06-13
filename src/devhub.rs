@@ -31,6 +31,7 @@ pub struct Class {
 #[derive(Debug, Deserialize)]
 pub struct Property {
     pub title: String,
+    pub display_title: String,
     pub description: Option<String>,
 }
 
