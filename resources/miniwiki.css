@@ -1,19 +1,18 @@
 * {
-	font: inherit;
 	box-sizing: inherit;
 	line-height: inherit;
 	margin: 0;
 	padding: 0;
 	border: none;
-	overflow: hidden;
+	font-family: sans-serif;
 }
 
 html {
 	box-sizing: border-box;
-	font-family: sans-serif;
 	font-size: 18px;
 	line-height: 1.4;
 	overflow: auto;
+	background: #fefefe;
 }
 
 a, a:visited {
@@ -22,65 +21,62 @@ a, a:visited {
 	position: relative;
 }
 
-a::after {
-	content: "";
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	height: 1px;
-	border-bottom: 1px dashed #0085d6;
-}
-
 .dump-info {
 	display: inline-flex;
 	justify-content: center;
 	align-items: center;
 	text-align: center;
-
-	font-size: 1rem;
-	border: 1px solid #aaa;
-	border-radius: 100%;
+	border-radius: 2px;
+	font-size: 0.875rem;
 	width: 1.2em;
 	height: 1.2em;
+	background: rgba(0, 133, 214, 0.5)
+}
+
+.dump-info:hover {
+	background: #0085d6;
 }
 
 .dump-info::before {
 	content: "i";
-	color: #aaa;
+	color: #fff;
+	font-family: serif;
+	font-weight: bold;
 }
 
 .dump-classes {
 	width: 100%;
-	max-width: 64rem;
+	max-width: 48rem;
 	margin: 0 auto;
+	font-size: 0.875rem;
 }
 
 .dump-class {
-	background-color: #eee;
-	margin: 0.5rem;
-	border: 1px solid rgba(0, 0, 0, 0.2);
-	box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.3);
+	margin-top: 3em;
+	margin-bottom: 4em;
 }
 
 .dump-class-title {
-	font-size: 2rem;
+	display: block;
+	font-size: 1.75rem;
 	font-weight: bold;
-	margin-left: 0.5rem;
+	margin: 0.5rem;
 	margin-bottom: 0.25em;
+	width: 100%;
 }
 
 .dump-class-subtitle {
-	font-size: 1.5rem;
+	font-size: 1.2rem;
 	font-weight: bold;
-	margin-left: 0.5rem;
-	margin-bottom: 0.25em;
+	padding-left: 0.5rem;
+	position: relative;
+	margin-bottom: 0.5em;
 }
 
 .dump-class-tags,
 .dump-class-inherits {
 	font-style: italic;
-	margin-left: 0.5rem;
+	margin: 0.5rem;
 	margin-bottom: 1rem;
 }
 
@@ -88,29 +84,33 @@ a::after {
 	display: flex;
 	padding-left: 0.5rem;
 	padding-right: 0.5rem;
+	margin-bottom: 1.5rem;
+	position: relative;
 }
 
 .dump-class-description-text {
 	flex: 1 0;
-	padding-right: 1rem;
 }
 
 .dump-class-description-meta {
 	flex: 0 0 auto;
+	position: absolute;
+	top: 0;
+	left: -1.5rem;
 }
 
 .dump-class-member-anchor {
-	font-weight: bold;
-	font-family: monospace;
-	margin-right: 0.5em;
+	position: absolute;
+	top: 0;
+	left: 0;
+	color: rgba(0, 0, 0, 0);
 }
 
 .dump-class-member-section {
-	margin-top: 0.5rem;
+	margin-top: 2rem;
 }
 
 .dump-class-member-section:not(:last-child) {
-	border-bottom: 2px solid rgba(0, 0, 0, 0.25);
 }
 
 .dump-class-member-section-list {
@@ -118,14 +118,32 @@ a::after {
 
 .dump-class-member {
 	padding: 0.5rem;
+	position: relative;
+	overflow: visible;
+	margin-bottom: .5rem;
+}
+
+.dump-class-member-meta {
+	position: absolute;
+	top: 0;
+	left: -2rem;
+	height: 100%;
+	width: 2rem;
+	display: flex;
+	align-content: center;
+	justify-content: center;
+	padding-top: 0.5rem;
+	overflow: visible;
+}
+
+.dump-class-member-meta:empty {
+	display: none;
 }
 
 .dump-class-member:not(:last-child) {
-	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .dump-class-member:first-of-type {
-	border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .dump-class-member-name {
@@ -135,7 +153,8 @@ a::after {
 
 .dump-class-member-description {
 	display: flex;
-	padding-top: 1rem;
+	padding-top: .5rem;
+	overflow: visible;
 }
 
 .dump-class-member-description-text {
@@ -149,14 +168,20 @@ a::after {
 
 .dump-class-function-signature {
 	margin-bottom: 0.25rem;
+	background: rgba(0, 133, 214, 0.1);
+	border-radius: 3px;
+	padding: 0.5rem;
+	font-family: monospace;
 }
 
 .dump-function-name {
 	font-weight: bold;
+	font-family: monospace;
 }
 
 .dump-function-argument {
 	margin-left: 2rem;
+	font-family: monospace;
 }
 
 .markdown h1 {
@@ -185,5 +210,5 @@ a::after {
 .markdown code {
 	font-family: monospace;
 	background-color: rgba(0, 0, 0, 0.07);
-	padding: 0.1em;
+	padding: 0.5em;
 }
