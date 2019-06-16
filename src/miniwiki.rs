@@ -122,7 +122,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Events"</div>
                         <div class="dump-class-member-section-list">
-                            { Fragment::new(class.events().map(render_event)) }
+                            { Fragment::new(class.events().map(|event| render_event(event, &class.name))) }
                         </div>
                     </div>
                 )
@@ -135,7 +135,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Callbacks"</div>
                         <div class="dump-class-member-section-list">
-                            { Fragment::new(class.callbacks().map(render_callback)) }
+                            { Fragment::new(class.callbacks().map(|callback| render_callback(callback, &class.name))) }
                         </div>
                     </div>
                 )
@@ -210,33 +210,37 @@ fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> Ht
     )
 }
 
-fn render_event(event: &DumpClassEvent) -> HtmlContent {
+fn render_event<'a>(event: &'a DumpClassEvent, parent_name: &str) -> HtmlContent<'a> {
     let description = event.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
+    let qualified_name = format!("{}.{}", parent_name, event.name);
+
     html!(
-        <div class="dump-class-member">
-            <div class="dump-class-member-name">
+        <div class="dump-class-member" id={ qualified_name.clone() }>
+            <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
                 { &event.name }
-            </div>
+            </a>
             { render_member_description(description, event.description_source) }
         </div>
     )
 }
 
-fn render_callback(callback: &DumpClassCallback) -> HtmlContent {
+fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> HtmlContent<'a> {
     let description = callback.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
+    let qualified_name = format!("{}.{}", parent_name, callback.name);
+
     html!(
-        <div class="dump-class-member">
-            <div class="dump-class-member-name">
+        <div class="dump-class-member" id={ qualified_name.clone() }>
+            <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
                 { &callback.name }
-            </div>
+            </a>
             { render_member_description(description, callback.description_source) }
         </div>
     )
