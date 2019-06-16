@@ -238,6 +238,8 @@ pub struct DumpClassCallback {
     #[serde(default = "Vec::new")]
     pub tags: Vec<String>,
 
+    pub parameters: Vec<DumpFunctionParameter>,
+
     pub security: String,
 
     /// Added by Dumpling
