@@ -99,13 +99,6 @@ a, a:visited {
 	left: -1.5rem;
 }
 
-.dump-class-member-anchor {
-	position: absolute;
-	top: 0;
-	left: 0;
-	color: rgba(0, 0, 0, 0);
-}
-
 .dump-class-member-section {
 	margin-top: 2rem;
 }
@@ -164,6 +157,10 @@ a, a:visited {
 
 .dump-class-member-description-meta {
 	flex: 0 0 auto;
+}
+
+.dump-class-property-signature {
+	font-family: monospace;
 }
 
 .dump-class-function-signature {
