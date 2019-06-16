@@ -14,6 +14,7 @@ use crate::{
         DumpClassEvent,
         DumpClassFunction,
         DumpClassProperty,
+        DumpFunctionParameter
     },
 };
 
@@ -175,24 +176,6 @@ fn render_function(function: &DumpClassFunction) -> HtmlContent {
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    let parameters = function.parameters
-        .iter()
-        .enumerate()
-        .map(|(index, param)| html!(
-            <div class="dump-function-argument">
-                { &param.name }
-                ": "
-                { render_type_link(&param.kind.name) }
-                {
-                    if index < function.parameters.len() - 1 {
-                        ",".into()
-                    } else {
-                        HtmlContent::None
-                    }
-                }
-            </div>
-        ));
-
     html!(
         <div class="dump-class-member">
             <div class="dump-class-function-signature">
@@ -200,7 +183,7 @@ fn render_function(function: &DumpClassFunction) -> HtmlContent {
                     { &function.name }
                 </span>
                 "("
-                { Fragment::new(parameters) }
+                { render_arguments(&function.parameters) }
                 "): "
                 { render_type_link(&function.return_type.name) }
             </div>
@@ -217,8 +200,15 @@ fn render_event(event: &DumpClassEvent) -> HtmlContent {
 
     html!(
         <div class="dump-class-member">
-            <div class="dump-class-member-name">
-                { &event.name }
+            <div class="dump-class-event-signature">
+                <span class="dump-class-member-name">
+                    { &event.name }
+                </span>
+                ": "
+                { render_type_link("RBXScriptSignal") }
+                "("
+                { render_arguments(&event.parameters) }
+                ")"
             </div>
             { render_member_description(description, event.description_source) }
         </div>
@@ -233,8 +223,13 @@ fn render_callback(callback: &DumpClassCallback) -> HtmlContent {
 
     html!(
         <div class="dump-class-member">
-            <div class="dump-class-member-name">
-                { &callback.name }
+            <div class="dump-class-callback-signature">
+                <span class="dump-class-member-name">
+                    { &callback.name }
+                </span>
+                ": function("
+                { render_arguments(&callback.parameters) }
+                ")"
             </div>
             { render_member_description(description, callback.description_source) }
         </div>
@@ -262,4 +257,24 @@ fn render_type_link(name: &str) -> HtmlContent {
             { name }
         </a>
     )
+}
+
+fn render_arguments(parameters: &Vec<DumpFunctionParameter>) -> Fragment {
+    Fragment::new(parameters
+        .iter()
+        .enumerate()
+        .map(|(index, param)| html!(
+            <div class="dump-function-argument">
+                { &param.name }
+                ": "
+                { render_type_link(&param.kind.name) }
+                {
+                    if index < parameters.len() - 1 {
+                        ",".into()
+                    } else {
+                        HtmlContent::None
+                    }
+                }
+            </div>
+        )))
 }
