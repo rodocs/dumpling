@@ -4,14 +4,17 @@ use std::{
     fs,
     io,
     path::Path,
+    process::Command,
 };
 
 use serde_derive::{Serialize, Deserialize};
+use roblox_install::RobloxStudio;
 
 #[derive(Debug)]
 pub enum DumpReadError {
     InvalidJson(serde_json::Error),
     IoError(io::Error),
+    RobloxInstall(roblox_install::Error),
 }
 
 impl From<serde_json::Error> for DumpReadError {
@@ -26,6 +29,12 @@ impl From<io::Error> for DumpReadError {
     }
 }
 
+impl From<roblox_install::Error> for DumpReadError {
+    fn from(error: roblox_install::Error) -> DumpReadError {
+        DumpReadError::RobloxInstall(error)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Dump {
@@ -35,6 +44,28 @@ pub struct Dump {
 }
 
 impl Dump {
+    pub fn read(path: Option<&Path>) -> Result<Dump, DumpReadError> {
+        match path {
+            Some(path) => Dump::read_from_file(path),
+            None => {
+                let temp_dir = tempfile::tempdir()?;
+                let dump_path = temp_dir.path().join("api-dump.json");
+                let exe_path = RobloxStudio::locate()?.exe_path();
+
+                let status = Command::new(exe_path)
+                    .args(&["-API", &dump_path.display().to_string()])
+                    .status()
+                    .expect("Failed to spawn Roblox Studio process");
+
+                if !status.success() {
+                    panic!("Roblox Studio exited with a non-zero status code");
+                }
+
+                Dump::read_from_file(&dump_path)
+            }
+        }
+    }
+
     pub fn read_from_file(path: &Path) -> Result<Dump, DumpReadError> {
         let contents = fs::read_to_string(path)?;
 
@@ -48,6 +79,7 @@ impl Dump {
 pub enum ContentSource {
     ApiDump,
     ReflectionMetadata,
+    DevHub,
     Heuristic,
     Supplemental,
 }
@@ -57,6 +89,7 @@ impl fmt::Display for ContentSource {
         match self {
             ContentSource::ApiDump => write!(output, "JSON API Dump"),
             ContentSource::ReflectionMetadata => write!(output, "ReflectionMetadata.xml"),
+            ContentSource::DevHub => write!(output, "Roblox Developer Hub"),
             ContentSource::Heuristic => write!(output, "Dumpling Heuristics"),
             ContentSource::Supplemental => write!(output, "Dumpling Supplemental"),
         }
@@ -85,6 +118,13 @@ pub struct DumpClass {
 impl DumpClass {
     pub fn properties(&self) -> impl Iterator<Item = &DumpClassProperty> {
         self.members.iter().filter_map(|member| match member {
+            DumpClassMember::Property(inner) => Some(inner),
+            _ => None,
+        })
+    }
+
+    pub fn properties_mut(&mut self) -> impl Iterator<Item = &mut DumpClassProperty> {
+        self.members.iter_mut().filter_map(|member| match member {
             DumpClassMember::Property(inner) => Some(inner),
             _ => None,
         })

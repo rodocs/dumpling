@@ -2,4 +2,4 @@
 
 set -e
 
-cargo run -- miniwiki --dump dump.json --metadata ReflectionMetadata.xml --content content --output miniwiki.html
+cargo run -- miniwiki --content content --output miniwiki.html

@@ -1,10 +1,12 @@
 #![recursion_limit="1024"]
 
-pub mod dump;
-pub mod miniwiki;
-pub mod supplement;
-pub mod reflection_metadata;
-pub mod heuristics;
+mod devhub;
+mod dump;
+mod dump_devhub;
+mod heuristics;
+mod miniwiki;
+mod reflection_metadata;
+mod supplement;
 
 use std::{
     fs,
@@ -21,6 +23,7 @@ use crate::{
     dump::{Dump, ContentSource},
     supplement::SupplementalData,
     reflection_metadata::ReflectionMetadata,
+    dump_devhub::DevHubData,
 };
 
 fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
@@ -46,21 +49,38 @@ fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
 
 fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
     for class in dump.classes.iter_mut() {
-        match content.item_descriptions.get(&class.name) {
-            Some(description) => {
-                class.description = Some(description.prose.clone());
-                class.description_source = Some(ContentSource::Supplemental);
-            },
-            None => {},
+        // TODO: Apply descriptions for instance members too
+        if let Some(description) = content.item_descriptions.get(&class.name) {
+            class.description = Some(description.prose.clone());
+            class.description_source = Some(ContentSource::Supplemental);
         }
     }
 }
 
-fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, content_path: &Path) -> Dump {
-    let mut dump = Dump::read_from_file(dump_path)
+fn apply_devhub(dump: &mut Dump, content: &DevHubData) {
+    for devhub_class in content.classes.values() {
+        if let Some(dump_class) = dump.classes.iter_mut().find(|item| item.name == devhub_class.name) {
+            dump_class.description = Some(devhub_class.description.clone());
+
+            for property in &devhub_class.properties {
+                if let Some(dump_member) = dump_class.properties_mut().find(|item| item.name == property.name) {
+                    dump_member.description = Some(property.description.clone());
+                    dump_member.description_source = Some(ContentSource::DevHub);
+                }
+            }
+        }
+    }
+}
+
+fn load_combined_dump(
+    dump_path: Option<&Path>,
+    reflection_metadata_path: Option<&Path>,
+    content_path: &Path,
+) -> Dump {
+    let mut dump = Dump::read(dump_path)
         .expect("Could not load JSON API dump");
 
-    let metadata = ReflectionMetadata::read_from_file(reflection_metadata_path)
+    let metadata = ReflectionMetadata::read(reflection_metadata_path)
         .expect("Could not load ReflectionMetadata!");
 
     let content = SupplementalData::read_from_path(content_path)
@@ -68,6 +88,11 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, content
 
     apply_reflection_metadata(&mut dump, &metadata);
     heuristics::camelcase_members_probably_deprecated(&mut dump);
+
+    // TODO: Disabled while we iterate on this!
+    // let devhub_data = DevHubData::fetch(&dump);
+    // apply_devhub(&mut dump, &devhub_data);
+
     apply_supplemental(&mut dump, &content);
 
     dump
@@ -75,8 +100,8 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, content
 
 struct MiniwikiOptions<'a> {
     output_path: &'a Path,
-    dump_path: &'a Path,
-    metadata_path: &'a Path,
+    dump_path: Option<&'a Path>,
+    metadata_path: Option<&'a Path>,
     content_path: &'a Path,
 }
 
@@ -93,8 +118,8 @@ fn miniwiki(options: &MiniwikiOptions) {
 
 struct MegadumpOptions<'a> {
     output_path: &'a Path,
-    dump_path: &'a Path,
-    metadata_path: &'a Path,
+    dump_path: Option<&'a Path>,
+    metadata_path: Option<&'a Path>,
     content_path: &'a Path,
 }
 
@@ -112,13 +137,11 @@ fn main() {
     let dump_arg = Arg::with_name("dump")
         .long("dump")
         .help("The location of the Roblox JSON API dump")
-        .required(true)
         .takes_value(true);
 
     let metadata_arg = Arg::with_name("metadata")
         .long("metadata")
         .help("The location of the Roblox ReflectionMetadata.xml file")
-        .required(true)
         .takes_value(true);
 
     let content_arg = Arg::with_name("content")
@@ -159,8 +182,8 @@ fn main() {
         ("miniwiki", command_matches) => {
             let command_matches = command_matches.unwrap();
             let output_path = Path::new(command_matches.value_of("output").unwrap());
-            let dump_path = Path::new(command_matches.value_of("dump").unwrap());
-            let metadata_path = Path::new(command_matches.value_of("metadata").unwrap());
+            let dump_path = command_matches.value_of("dump").map(Path::new);
+            let metadata_path = command_matches.value_of("metadata").map(Path::new);
             let content_path = Path::new(command_matches.value_of("content").unwrap());
 
             miniwiki(&MiniwikiOptions {
@@ -173,8 +196,8 @@ fn main() {
         ("megadump", command_matches) => {
             let command_matches = command_matches.unwrap();
             let output_path = Path::new(command_matches.value_of("output").unwrap());
-            let dump_path = Path::new(command_matches.value_of("dump").unwrap());
-            let metadata_path = Path::new(command_matches.value_of("metadata").unwrap());
+            let dump_path = command_matches.value_of("dump").map(Path::new);
+            let metadata_path = command_matches.value_of("metadata").map(Path::new);
             let content_path = Path::new(command_matches.value_of("content").unwrap());
 
             megadump(&MegadumpOptions {
