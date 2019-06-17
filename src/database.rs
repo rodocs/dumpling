@@ -8,11 +8,56 @@ pub struct Database {
     pub classes: HashMap<String, Class>,
 }
 
+impl Database {
+    pub fn new() -> Database {
+        Database {
+            classes: HashMap::new(),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SourceText {
     pub text: String,
     pub source: Source,
+}
+
+impl SourceText {
+    pub fn from_dump(text: String) -> SourceText {
+        SourceText {
+            text,
+            source: Source::ApiDump,
+        }
+    }
+
+    pub fn from_reflection_metadata(text: String) -> SourceText {
+        SourceText {
+            text,
+            source: Source::ReflectionMetadata,
+        }
+    }
+
+    pub fn from_dev_hub(text: String) -> SourceText {
+        SourceText {
+            text,
+            source: Source::DevHub,
+        }
+    }
+
+    pub fn from_heuristic(text: String) -> SourceText {
+        SourceText {
+            text,
+            source: Source::Heuristic,
+        }
+    }
+
+    pub fn from_community(text: String) -> SourceText {
+        SourceText {
+            text,
+            source: Source::Community,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

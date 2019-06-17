@@ -29,7 +29,7 @@ use std::{
 
 use serde::Deserialize;
 
-use crate::database::{Database, Source, SourceText};
+use crate::database::{Database, SourceText};
 
 // This is inspired by Hugo's TOML front-matter indicator
 // --- is used for YAML, and +++ is used to disambiguate for TOML.
@@ -54,27 +54,18 @@ impl SupplementalData {
     pub fn apply(&self, database: &mut Database) {
         for (class_name, class) in database.classes.iter_mut() {
             if let Some(entry) = self.item_descriptions.get(class_name) {
-                class.description = Some(SourceText {
-                    text: entry.prose.clone(),
-                    source: Source::Community,
-                });
+                class.description = Some(SourceText::from_community(entry.prose.clone()));
             }
 
             for (prop_name, property) in class.properties.iter_mut() {
                 if let Some(entry) = self.item_descriptions.get(prop_name) {
-                    property.description = Some(SourceText {
-                        text: entry.prose.clone(),
-                        source: Source::Community,
-                    });
+                    property.description = Some(SourceText::from_community(entry.prose.clone()));
                 }
             }
 
             for (prop_name, function) in class.functions.iter_mut() {
                 if let Some(entry) = self.item_descriptions.get(prop_name) {
-                    function.description = Some(SourceText {
-                        text: entry.prose.clone(),
-                        source: Source::Community,
-                    });
+                    function.description = Some(SourceText::from_community(entry.prose.clone()));
 
                     // TODO: Apply descriptions for function parameters somehow?
                 }
@@ -82,10 +73,7 @@ impl SupplementalData {
 
             for (prop_name, event) in class.events.iter_mut() {
                 if let Some(entry) = self.item_descriptions.get(prop_name) {
-                    event.description = Some(SourceText {
-                        text: entry.prose.clone(),
-                        source: Source::Community,
-                    });
+                    event.description = Some(SourceText::from_community(entry.prose.clone()));
 
                     // TODO: Apply descriptions for event parameters somehow?
                 }
@@ -93,10 +81,7 @@ impl SupplementalData {
 
             for (prop_name, callback) in class.callbacks.iter_mut() {
                 if let Some(entry) = self.item_descriptions.get(prop_name) {
-                    callback.description = Some(SourceText {
-                        text: entry.prose.clone(),
-                        source: Source::Community,
-                    });
+                    callback.description = Some(SourceText::from_community(entry.prose.clone()));
 
                     // TODO: Apply descriptions for function parameters somehow?
                 }

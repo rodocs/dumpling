@@ -10,6 +10,8 @@ use std::{
 use serde::{Serialize, Deserialize};
 use roblox_install::RobloxStudio;
 
+use crate::database::{self, Database};
+
 #[derive(Debug)]
 pub enum DumpReadError {
     InvalidJson(serde_json::Error),
@@ -72,6 +74,50 @@ impl Dump {
         let dump: Dump = serde_json::from_str(&contents)?;
 
         Ok(dump)
+    }
+
+    pub fn create_database(&self) -> Database {
+        let mut database = Database::new();
+
+        for dump_class in &self.classes {
+            let mut properties = HashMap::new();
+            let mut functions = HashMap::new();
+            let mut events = HashMap::new();
+            let mut callbacks = HashMap::new();
+
+            for dump_member in &dump_class.members {
+                match dump_member {
+                    DumpClassMember::Property(dump_property) => {
+                        properties.insert(dump_property.name.clone(), database::Property {
+                            name: dump_property.name.clone(),
+                            description: None,
+                            data_type: database::DataType::Primitive("TODO".to_string()),
+                        });
+                    }
+                    DumpClassMember::Function(dump_function) => {
+                        // TODO
+                    }
+                    DumpClassMember::Event(dump_event) => {
+                        // TODO
+                    }
+                    DumpClassMember::Callback(dump_callback) => {
+                        // TODO
+                    }
+                }
+            }
+
+            database.classes.insert(dump_class.name.clone(), database::Class {
+                name: dump_class.name.clone(),
+                description: None,
+                superclass: dump_class.superclass.clone(),
+                properties,
+                functions,
+                events,
+                callbacks,
+            });
+        }
+
+        database
     }
 }
 
