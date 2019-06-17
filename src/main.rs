@@ -7,6 +7,7 @@ mod heuristics;
 mod miniwiki;
 mod reflection_metadata;
 mod supplement;
+mod database;
 
 use std::{
     fs,
