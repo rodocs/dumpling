@@ -1,20 +1,25 @@
 # Dumpling
-Dumpling is a tool to combine Roblox's JSON API dump with user-authored descriptions of APIs.
+Dumpling is a tool that combines data from several sources and creates an easy-to-use documentation database that anyone can use and contribute to.
 
-Dumpling aggregates a bunch of data:
-* Roblox JSON API dump
-* ReflectionMetadata.xml
-* Roblox Developer Hub
-* Hand-crafted heuristics
-* Community-authored descriptions
+Dumpling aggregates:
+* Roblox Studio JSON API dump
+* Roblox Studio `ReflectionMetadata.xml`
+* Roblox Developer Hub (**soon!**)
+* Hand-crafted heuristics, like how deprecated members are usually `camelCase`
+* [Community documentation](https://github.com/rodocs/docs)
 
-Dumpling produces easily consumed JSON in the same structure as the current Roblox JSON API dump, meaning it's pretty close to a drop-in replacement!
+## Installation
+To install Dumpling, you'll need the most recent stable version of [Rust](https://www.rust-lang.org/).
 
-It can also produce a single file, offline-accesible miniature Roblox API reference that can be used to verify its content. A version of this is hosted via [GitHub pages here](https://lpghatguy.github.io/dumpling/).
+Rust was chosen for a project like this because it's fast, portable, doesn't need a scripting runtime, and has a good static type system.
+
+Once you have Rust, you can run:
+
+```sh
+cargo install --git https://github.com/rodocs/dumpling.git
+```
 
 ## Usage
-Dumpling has two modes to demonstrate its functionality: Megadump, and Miniwiki.
-
 Dumpling needs access to:
 
 The Roblox JSON API dump, which can be produced via a Roblox Studio binary:
@@ -25,7 +30,9 @@ RobloxStudioBeta.exe -API dump.json
 
 Roblox's `ReflectionMetadata.xml`, which can be pulled out of a Roblox installation.
 
-A user content directory. This repository includes one, located in the `content` directory.
+A user content directory. This repository includes one, located in the `content` directory. **This repository will be moved to [https://github.com/rodocs/docs](https://github.com/rodocs/docs) soon!**
+
+Dumpling has two modes to demonstrate its functionality: Megadump, and Miniwiki.
 
 ### Megadump
 Megadump generates a JSON API dump with extra information attached. You can use this as the foundation for your own API reference or other tools that want to consume API information.
@@ -41,8 +48,5 @@ Miniwiki generates a single page, offline-accessible, miniature API reference. I
 cargo run -- miniwiki --dump dump.json --metadata ReflectionMetadata.xml --content content -o miniwiki.html
 ```
 
-## Requirements
-* Rust 1.31+
-
 ## License
-Dumpling is available under the terms of the Mozilla Public License, Version 2.0. See [LICENSE](LICENSE) for details.
+Dumpling is available under the terms of the Mozilla Public License, Version 2.0. See [LICENSE.txt](LICENSE.txt) for details.
