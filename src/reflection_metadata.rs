@@ -284,7 +284,12 @@ impl ReflectionMetadataMember {
                     if NAME_QUERY.matches(&reader, relevant_stack) {
                         name = text.unescape_and_decode(reader).unwrap();
                     } else if SUMMARY_QUERY.matches(&reader, relevant_stack) {
-                        summary = text.unescape_and_decode(reader).unwrap();
+                        summary = text.unescape_and_decode(reader)
+                            .unwrap()
+                            .lines()
+                            .map(str::trim_start)
+                            .collect::<Vec<_>>()
+                            .join("\n\n");
                     }
                 },
                 Ok(Event::Eof) => break,
