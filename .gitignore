@@ -1,9 +1,6 @@
 /target
 **/*.rs.bk
 
-# GitHub pages clone within this repository
-/site
-
 # Test data
 /dump.json
 /miniwiki.html
