@@ -4,6 +4,7 @@ mod devhub;
 mod dump;
 mod dump_devhub;
 mod heuristics;
+mod mini;
 mod miniwiki;
 mod reflection_metadata;
 mod supplement;
@@ -25,6 +26,7 @@ use crate::{
     supplement::SupplementalData,
     reflection_metadata::ReflectionMetadata,
     dump_devhub::DevHubData,
+    database::Database,
 };
 
 fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
@@ -48,16 +50,6 @@ fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
     }
 }
 
-fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
-    for class in dump.classes.iter_mut() {
-        // TODO: Apply descriptions for instance members too
-        if let Some(description) = content.item_descriptions.get(&class.name) {
-            class.description = Some(description.prose.clone());
-            class.description_source = Some(ContentSource::Supplemental);
-        }
-    }
-}
-
 fn apply_devhub(dump: &mut Dump, content: &DevHubData) {
     for devhub_class in content.classes.values() {
         if let Some(dump_class) = dump.classes.iter_mut().find(|item| item.name == devhub_class.name) {
@@ -73,30 +65,28 @@ fn apply_devhub(dump: &mut Dump, content: &DevHubData) {
     }
 }
 
-fn load_combined_dump(
+fn load_database(
     dump_path: Option<&Path>,
     reflection_metadata_path: Option<&Path>,
     content_path: &Path,
-) -> Dump {
-    let mut dump = Dump::read(dump_path)
+) -> Database {
+    let dump = Dump::read(dump_path)
         .expect("Could not load JSON API dump");
+
+    let mut database = dump.create_database();
 
     let metadata = ReflectionMetadata::read(reflection_metadata_path)
         .expect("Could not load ReflectionMetadata!");
 
-    let content = SupplementalData::read_from_path(content_path)
-        .expect("Could not load content data");
+    let community_content = SupplementalData::read_from_path(content_path)
+        .expect("Could not load community content");
 
-    apply_reflection_metadata(&mut dump, &metadata);
-    heuristics::camelcase_members_probably_deprecated(&mut dump);
+    // TODO: ReflectionMetadata
+    // TODO: Heuristics
+    community_content.apply(&mut database);
+    // TODO: DevHub
 
-    // TODO: Disabled while we iterate on this!
-    // let devhub_data = DevHubData::fetch(&dump);
-    // apply_devhub(&mut dump, &devhub_data);
-
-    apply_supplemental(&mut dump, &content);
-
-    dump
+    database
 }
 
 struct MiniwikiOptions<'a> {
@@ -107,10 +97,10 @@ struct MiniwikiOptions<'a> {
 }
 
 fn miniwiki(options: &MiniwikiOptions) {
-    let dump = load_combined_dump(options.dump_path, options.metadata_path, options.content_path);
+    let dump = load_database(options.dump_path, options.metadata_path, options.content_path);
 
     let mut output = String::new();
-    miniwiki::emit_wiki(&dump, &mut output)
+    mini::emit_wiki(&dump, &mut output)
         .expect("Could not generate Miniwiki");
 
     fs::write(options.output_path, &output)
@@ -125,10 +115,10 @@ struct MegadumpOptions<'a> {
 }
 
 fn megadump(options: &MegadumpOptions) {
-    let dump = load_combined_dump(options.dump_path, options.metadata_path, options.content_path);
+    let database = load_database(options.dump_path, options.metadata_path, options.content_path);
 
-    let output = serde_json::to_string(&dump)
-        .expect("Could not convert dump to JSON");
+    let output = serde_json::to_string(&database)
+        .expect("Could not convert database to JSON");
 
     fs::write(options.output_path, &output)
         .expect("Could not write to output file");

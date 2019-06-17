@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fmt,
+};
 
 use serde::{Serialize, Deserialize};
 
@@ -67,6 +70,20 @@ pub enum Source {
     DevHub,
     Heuristic,
     Community,
+}
+
+impl fmt::Display for Source {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        use self::Source::*;
+
+        match self {
+            ApiDump => write!(formatter, "ApiDump"),
+            ReflectionMetadata => write!(formatter, "ReflectionMetadata"),
+            DevHub => write!(formatter, "DevHub"),
+            Heuristic => write!(formatter, "Heuristic"),
+            Community => write!(formatter, "Community"),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
