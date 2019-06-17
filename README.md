@@ -22,14 +22,6 @@ cargo install --git https://github.com/rodocs/dumpling.git
 ## Usage
 Dumpling needs access to:
 
-The Roblox JSON API dump, which can be produced via a Roblox Studio binary:
-
-```sh
-RobloxStudioBeta.exe -API dump.json
-```
-
-Roblox's `ReflectionMetadata.xml`, which can be pulled out of a Roblox installation.
-
 A user content directory. This repository includes one, located in the `content` directory. **This repository will be moved to [https://github.com/rodocs/docs](https://github.com/rodocs/docs) soon!**
 
 Dumpling has two modes to demonstrate its functionality: Megadump, and Miniwiki.
@@ -38,14 +30,14 @@ Dumpling has two modes to demonstrate its functionality: Megadump, and Miniwiki.
 Megadump generates a JSON API dump with extra information attached. You can use this as the foundation for your own API reference or other tools that want to consume API information.
 
 ```sh
-cargo run -- megadump --dump dump.json --metadata ReflectionMetadata.xml --content content -o megadump.json
+cargo run -- megadump --content content -o megadump.json
 ```
 
 ### Miniwiki
 Miniwiki generates a single page, offline-accessible, miniature API reference. It's intended as an example of the information contained in Dumpling.
 
 ```sh
-cargo run -- miniwiki --dump dump.json --metadata ReflectionMetadata.xml --content content -o miniwiki.html
+cargo run -- miniwiki --content content -o miniwiki.html
 ```
 
 ## License
