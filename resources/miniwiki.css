@@ -103,12 +103,6 @@ a, a:visited {
 	margin-top: 2rem;
 }
 
-.dump-class-member-section:not(:last-child) {
-}
-
-.dump-class-member-section-list {
-}
-
 .dump-class-member {
 	padding: 0.5rem;
 	position: relative;
@@ -133,12 +127,6 @@ a, a:visited {
 	display: none;
 }
 
-.dump-class-member:not(:last-child) {
-}
-
-.dump-class-member:first-of-type {
-}
-
 .dump-class-member-name {
 	font-weight: bold;
 	font-family: monospace;
@@ -153,10 +141,6 @@ a, a:visited {
 .dump-class-member-description-text {
 	flex: 1 0;
 	padding-right: 1rem;
-}
-
-.dump-class-member-description-text,p {
-	margin-bottom: 0.25em
 }
 
 .dump-class-member-description-meta {
@@ -207,4 +191,12 @@ a, a:visited {
 	font-family: monospace;
 	background-color: rgba(0, 0, 0, 0.07);
 	padding: 0.5em;
+}
+
+.markdown p {
+	margin-bottom: 0.25em
+}
+
+.markdown ul {
+	padding-left: 2em
 }
