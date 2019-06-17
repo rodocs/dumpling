@@ -1,12 +1,12 @@
 #![recursion_limit="1024"]
 
-pub mod devhub;
-pub mod dump;
-pub mod dump_devhub;
-pub mod heuristics;
-pub mod miniwiki;
-pub mod reflection_metadata;
-pub mod supplement;
+mod devhub;
+mod dump;
+mod dump_devhub;
+mod heuristics;
+mod miniwiki;
+mod reflection_metadata;
+mod supplement;
 
 use std::{
     fs,
@@ -72,11 +72,15 @@ fn apply_devhub(dump: &mut Dump, content: &DevHubData) {
     }
 }
 
-fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, content_path: &Path) -> Dump {
+fn load_combined_dump(
+    dump_path: &Path,
+    reflection_metadata_path: Option<&Path>,
+    content_path: &Path,
+) -> Dump {
     let mut dump = Dump::read_from_file(dump_path)
         .expect("Could not load JSON API dump");
 
-    let metadata = ReflectionMetadata::read_from_file(reflection_metadata_path)
+    let metadata = ReflectionMetadata::read(reflection_metadata_path)
         .expect("Could not load ReflectionMetadata!");
 
     let content = SupplementalData::read_from_path(content_path)
@@ -97,7 +101,7 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, content
 struct MiniwikiOptions<'a> {
     output_path: &'a Path,
     dump_path: &'a Path,
-    metadata_path: &'a Path,
+    metadata_path: Option<&'a Path>,
     content_path: &'a Path,
 }
 
@@ -115,7 +119,7 @@ fn miniwiki(options: &MiniwikiOptions) {
 struct MegadumpOptions<'a> {
     output_path: &'a Path,
     dump_path: &'a Path,
-    metadata_path: &'a Path,
+    metadata_path: Option<&'a Path>,
     content_path: &'a Path,
 }
 
@@ -139,7 +143,6 @@ fn main() {
     let metadata_arg = Arg::with_name("metadata")
         .long("metadata")
         .help("The location of the Roblox ReflectionMetadata.xml file")
-        .required(true)
         .takes_value(true);
 
     let content_arg = Arg::with_name("content")
@@ -181,7 +184,7 @@ fn main() {
             let command_matches = command_matches.unwrap();
             let output_path = Path::new(command_matches.value_of("output").unwrap());
             let dump_path = Path::new(command_matches.value_of("dump").unwrap());
-            let metadata_path = Path::new(command_matches.value_of("metadata").unwrap());
+            let metadata_path = command_matches.value_of("metadata").map(Path::new);
             let content_path = Path::new(command_matches.value_of("content").unwrap());
 
             miniwiki(&MiniwikiOptions {
@@ -195,7 +198,7 @@ fn main() {
             let command_matches = command_matches.unwrap();
             let output_path = Path::new(command_matches.value_of("output").unwrap());
             let dump_path = Path::new(command_matches.value_of("dump").unwrap());
-            let metadata_path = Path::new(command_matches.value_of("metadata").unwrap());
+            let metadata_path = command_matches.value_of("metadata").map(Path::new);
             let content_path = Path::new(command_matches.value_of("content").unwrap());
 
             megadump(&MegadumpOptions {

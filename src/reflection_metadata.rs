@@ -2,6 +2,7 @@
 //! information.
 
 use std::{
+    borrow::Cow,
     collections::HashMap,
     fs,
     io::{self, BufRead},
@@ -18,6 +19,7 @@ use quick_xml::{
 };
 
 use lazy_static::lazy_static;
+use roblox_install::RobloxStudio;
 
 struct XmlQuery {
     pieces: Vec<(&'static str, Vec<(&'static str, &'static str)>)>,
@@ -84,11 +86,38 @@ fn extract_attributes<B: BufRead>(reader: &Reader<B>, attributes: Attributes) ->
 }
 
 #[derive(Debug)]
+pub enum ReflectionMetadataReadError {
+    Io(io::Error),
+    RobloxInstall(roblox_install::Error),
+}
+
+impl From<io::Error> for ReflectionMetadataReadError {
+    fn from(err: io::Error) -> Self {
+        ReflectionMetadataReadError::Io(err)
+    }
+}
+
+impl From<roblox_install::Error> for ReflectionMetadataReadError {
+    fn from(err: roblox_install::Error) -> Self {
+        ReflectionMetadataReadError::RobloxInstall(err)
+    }
+}
+
+#[derive(Debug)]
 pub struct ReflectionMetadata {
     pub classes: HashMap<String, ReflectionMetadataClass>,
 }
 
 impl ReflectionMetadata {
+    pub fn read(path: Option<&Path>) -> Result<ReflectionMetadata, ReflectionMetadataReadError> {
+        let path = match path {
+            Some(p) => Cow::Borrowed(p),
+            None => Cow::Owned(RobloxStudio::locate()?.root_path().join("ReflectionMetadata.xml")),
+        };
+
+        Ok(ReflectionMetadata::read_from_file(path.as_ref())?)
+    }
+
     pub fn read_from_file(path: &Path) -> io::Result<ReflectionMetadata> {
         let contents = fs::read_to_string(path)?;
 
