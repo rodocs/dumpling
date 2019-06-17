@@ -7,7 +7,7 @@ use std::{
     process::Command,
 };
 
-use serde_derive::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 use roblox_install::RobloxStudio;
 
 #[derive(Debug)]

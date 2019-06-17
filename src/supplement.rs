@@ -27,7 +27,7 @@ use std::{
     path::Path,
 };
 
-use serde_derive::Deserialize;
+use serde::Deserialize;
 
 // This is inspired by Hugo's TOML front-matter indicator
 // --- is used for YAML, and +++ is used to disambiguate for TOML.
