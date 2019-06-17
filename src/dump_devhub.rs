@@ -76,6 +76,7 @@ mod test {
 
     #[test]
     fn get_part_page() {
-        let _part = get_instance_page("Part");
+        // FIXME: This seems like a pretty poor unit test, hitting the network!
+        let _part = request_instance_page("Part");
     }
 }

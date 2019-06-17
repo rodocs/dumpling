@@ -82,11 +82,13 @@ fn load_combined_dump(dump_path: &Path, reflection_metadata_path: &Path, content
     let content = SupplementalData::read_from_path(content_path)
         .expect("Could not load content data");
 
-    let devhub_data = DevHubData::fetch(&dump);
-
     apply_reflection_metadata(&mut dump, &metadata);
     heuristics::camelcase_members_probably_deprecated(&mut dump);
-    apply_devhub(&mut dump, &devhub_data);
+
+    // TODO: Disabled while we iterate on this!
+    // let devhub_data = DevHubData::fetch(&dump);
+    // apply_devhub(&mut dump, &devhub_data);
+
     apply_supplemental(&mut dump, &content);
 
     dump

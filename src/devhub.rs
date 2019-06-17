@@ -39,7 +39,7 @@ pub struct Property {
 mod test {
     use super::*;
 
-    static EXAMPLE: &str = include_str!("../devhub-Part.json");
+    static EXAMPLE: &str = include_str!("../test-files/devhub-Part.json");
 
     #[test]
     fn deserialize() {
