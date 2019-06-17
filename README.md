@@ -20,9 +20,16 @@ cargo install --git https://github.com/rodocs/dumpling.git
 ```
 
 ## Usage
-Dumpling needs access to:
-
-A user content directory. This repository includes one, located in the `content` directory. **This repository will be moved to [https://github.com/rodocs/docs](https://github.com/rodocs/docs) soon!**
+Dumpling needs:
+* Roblox Studio's JSON API Dump
+	* Dumpling can find this automatically if you have Roblox Studio installed!
+	* You can specify `--dump <file>` to pass in your own
+* Roblox Studio's `ReflectionMetadata.xml` file
+	* Dumpling can find this automatically, too!
+	* Specify `--metadata <file>` to pass in a custom one
+* A user content directory
+	* **Soon**, Dumpling will pull this from [https://github.com/rodocs/docs](https://github.com/rodocs/docs)
+	* Until then, use `--content content` to use the `content` directory from this repository.
 
 Dumpling has two modes to demonstrate its functionality: Megadump, and Miniwiki.
 
