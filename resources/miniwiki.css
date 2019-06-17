@@ -163,16 +163,11 @@ a, a:visited {
 	font-family: monospace;
 }
 
-.dump-class-function-signature {
+.dump-function-signature {
 	margin-bottom: 0.25rem;
 	background: rgba(0, 133, 214, 0.1);
 	border-radius: 3px;
 	padding: 0.5rem;
-	font-family: monospace;
-}
-
-.dump-function-name {
-	font-weight: bold;
 	font-family: monospace;
 }
 

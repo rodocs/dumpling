@@ -178,8 +178,8 @@ fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> Ht
     let qualified_name = format!("{}.{}", parent_name, function.name);
 
     html!(
-        <div class="dump-class-member" id={ qualified_name.clone() }>
-            <div class="dump-class-function-signature">
+        <div class="dump-class-member dump-class-function" id={ qualified_name.clone() }>
+            <div class="dump-function-signature">
                 <a class="dump-class-member-name" href={ format!("#{}", qualified_name) }>
                     { &function.name }
                 </a>
@@ -202,8 +202,8 @@ fn render_event<'a>(event: &'a DumpClassEvent, parent_name: &str) -> HtmlContent
     let qualified_name = format!("{}.{}", parent_name, event.name);
 
     html!(
-        <div class="dump-class-member" id={ qualified_name.clone() }>
-            <div class="dump-class-event-signature">
+        <div class="dump-class-member dump-class-event" id={ qualified_name.clone() }>
+            <div class="dump-function-signature">
                 <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
                     { &event.name }
                 </a>
@@ -227,8 +227,8 @@ fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> Ht
     let qualified_name = format!("{}.{}", parent_name, callback.name);
 
     html!(
-        <div class="dump-class-member" id={ qualified_name.clone() }>
-            <div class="dump-class-callback-signature">
+        <div class="dump-class-member dump-class-callback" id={ qualified_name.clone() }>
+            <div class="dump-function-signature">
                 <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
                     { &callback.name }
                 </a>
