@@ -14,6 +14,7 @@ use crate::{
         DumpClassEvent,
         DumpClassFunction,
         DumpClassProperty,
+        DumpFunctionParameter
     },
 };
 
@@ -174,34 +175,16 @@ fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> Ht
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    let parameters = function.parameters
-        .iter()
-        .enumerate()
-        .map(|(index, param)| html!(
-            <div class="dump-function-argument">
-                { &param.name }
-                ": "
-                { render_type_link(&param.kind.name) }
-                {
-                    if index < function.parameters.len() - 1 {
-                        ",".into()
-                    } else {
-                        HtmlContent::None
-                    }
-                }
-            </div>
-        ));
-
     let qualified_name = format!("{}.{}", parent_name, function.name);
 
     html!(
-        <div class="dump-class-member" id={ qualified_name.clone() }>
-            <div class="dump-class-function-signature">
+        <div class="dump-class-member dump-class-function" id={ qualified_name.clone() }>
+            <div class="dump-function-signature">
                 <a class="dump-class-member-name" href={ format!("#{}", qualified_name) }>
                     { &function.name }
                 </a>
                 "("
-                { Fragment::new(parameters) }
+                { render_arguments(&function.parameters) }
                 "): "
                 { render_type_link(&function.return_type.name) }
             </div>
@@ -219,10 +202,17 @@ fn render_event<'a>(event: &'a DumpClassEvent, parent_name: &str) -> HtmlContent
     let qualified_name = format!("{}.{}", parent_name, event.name);
 
     html!(
-        <div class="dump-class-member" id={ qualified_name.clone() }>
-            <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
-                { &event.name }
-            </a>
+        <div class="dump-class-member dump-class-event" id={ qualified_name.clone() }>
+            <div class="dump-function-signature">
+                <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
+                    { &event.name }
+                </a>
+                ": "
+                { render_type_link("RBXScriptSignal") }
+                "("
+                { render_arguments(&event.parameters) }
+                ")"
+            </div>
             { render_member_description(description, event.description_source) }
         </div>
     )
@@ -237,10 +227,16 @@ fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> Ht
     let qualified_name = format!("{}.{}", parent_name, callback.name);
 
     html!(
-        <div class="dump-class-member" id={ qualified_name.clone() }>
-            <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
-                { &callback.name }
-            </a>
+        <div class="dump-class-member dump-class-callback" id={ qualified_name.clone() }>
+            <div class="dump-function-signature">
+                <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
+                    { &callback.name }
+                </a>
+                ": function("
+                { render_arguments(&callback.parameters) }
+                "): "
+                { render_type_link(&callback.return_type.name) }
+            </div>
             { render_member_description(description, callback.description_source) }
         </div>
     )
@@ -267,4 +263,24 @@ fn render_type_link(name: &str) -> HtmlContent {
             { name }
         </a>
     )
+}
+
+fn render_arguments(parameters: &Vec<DumpFunctionParameter>) -> Fragment {
+    Fragment::new(parameters
+        .iter()
+        .enumerate()
+        .map(|(index, param)| html!(
+            <div class="dump-function-argument">
+                { &param.name }
+                ": "
+                { render_type_link(&param.kind.name) }
+                {
+                    if index < parameters.len() - 1 {
+                        ",".into()
+                    } else {
+                        HtmlContent::None
+                    }
+                }
+            </div>
+        )))
 }
