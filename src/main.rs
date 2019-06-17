@@ -157,7 +157,7 @@ fn main() {
         .required(true)
         .takes_value(true);
 
-    let matches = App::new("Rodumpster")
+    let matches = App::new("Dumpling")
         .author(env!("CARGO_PKG_AUTHORS"))
         .version(env!("CARGO_PKG_VERSION"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
