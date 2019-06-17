@@ -110,7 +110,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Functions"</div>
                         <div class="dump-class-member-section-list">
-                            { Fragment::new(class.functions().map(render_function)) }
+                            { Fragment::new(class.functions().map(|function| render_function(function, &class.name))) }
                         </div>
                     </div>
                 )
@@ -123,7 +123,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Events"</div>
                         <div class="dump-class-member-section-list">
-                            { Fragment::new(class.events().map(render_event)) }
+                            { Fragment::new(class.events().map(|event| render_event(event, &class.name))) }
                         </div>
                     </div>
                 )
@@ -136,7 +136,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Callbacks"</div>
                         <div class="dump-class-member-section-list">
-                            { Fragment::new(class.callbacks().map(render_callback)) }
+                            { Fragment::new(class.callbacks().map(|callback| render_callback(callback, &class.name))) }
                         </div>
                     </div>
                 )
@@ -157,31 +157,32 @@ fn render_property<'a>(property: &'a DumpClassProperty, parent_name: &str) -> Ht
 
     html!(
         <div class="dump-class-member" id={ qualified_name.clone() }>
-            <a class="dump-class-member-anchor" href={ format!("#{}", qualified_name) }>
-                "#"
-            </a>
-            <span>
-                <span class="dump-class-member-name">{ &property.name }</span>
+            <div class="dump-class-property-signature">
+                <a class="dump-class-member-name" href={ format!("#{}", qualified_name) }>
+                    { &property.name }
+                </a>
                 ": "
                 { render_type_link(&property.value_type.name) }
-            </span>
+            </div>
             { render_member_description(description, property.description_source) }
         </div>
     )
 }
 
-fn render_function(function: &DumpClassFunction) -> HtmlContent {
+fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> HtmlContent<'a> {
     let description = function.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
+    let qualified_name = format!("{}.{}", parent_name, function.name);
+
     html!(
-        <div class="dump-class-member">
+        <div class="dump-class-member" id={ qualified_name.clone() }>
             <div class="dump-class-function-signature">
-                <span class="dump-class-member-name">
+                <a class="dump-class-member-name" href={ format!("#{}", qualified_name) }>
                     { &function.name }
-                </span>
+                </a>
                 "("
                 { render_arguments(&function.parameters) }
                 "): "
@@ -192,18 +193,20 @@ fn render_function(function: &DumpClassFunction) -> HtmlContent {
     )
 }
 
-fn render_event(event: &DumpClassEvent) -> HtmlContent {
+fn render_event<'a>(event: &'a DumpClassEvent, parent_name: &str) -> HtmlContent<'a> {
     let description = event.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
+    let qualified_name = format!("{}.{}", parent_name, event.name);
+
     html!(
-        <div class="dump-class-member">
+        <div class="dump-class-member" id={ qualified_name.clone() }>
             <div class="dump-class-event-signature">
-                <span class="dump-class-member-name">
+                <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
                     { &event.name }
-                </span>
+                </a>
                 ": "
                 { render_type_link("RBXScriptSignal") }
                 "("
@@ -215,18 +218,20 @@ fn render_event(event: &DumpClassEvent) -> HtmlContent {
     )
 }
 
-fn render_callback(callback: &DumpClassCallback) -> HtmlContent {
+fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> HtmlContent<'a> {
     let description = callback.description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
+    let qualified_name = format!("{}.{}", parent_name, callback.name);
+
     html!(
-        <div class="dump-class-member">
+        <div class="dump-class-member" id={ qualified_name.clone() }>
             <div class="dump-class-callback-signature">
-                <span class="dump-class-member-name">
+                <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
                     { &callback.name }
-                </span>
+                </a>
                 ": function("
                 { render_arguments(&callback.parameters) }
                 "): "

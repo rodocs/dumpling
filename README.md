@@ -26,6 +26,12 @@ Roblox's `ReflectionMetadata.xml`, which can be pulled out of a Roblox installat
 
 A user content directory. This repository includes one, located in the `content` directory.
 
+To install Dumpling, run:
+
+```sh
+cargo install --git https://github.com/LPGhatguy/dumpling.git
+```
+
 ### Megadump
 Megadump generates a JSON API dump with extra information attached. You can use this as the foundation for your own API reference or other tools that want to consume API information.
 
