@@ -39,6 +39,7 @@ pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
                 <meta charset="utf-8" />
                 <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no" />
                 <style>{ UnescapedText::new(STYLE) }</style>
+                <title>"Rodocs Mini"</title>
             </head>
             <body>
                 <div class="dump-classes">
