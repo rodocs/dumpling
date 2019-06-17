@@ -240,6 +240,8 @@ pub struct DumpClassCallback {
 
     pub parameters: Vec<DumpFunctionParameter>,
 
+    pub return_type: DumpType,
+
     pub security: String,
 
     /// Added by Dumpling

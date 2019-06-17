@@ -229,7 +229,8 @@ fn render_callback(callback: &DumpClassCallback) -> HtmlContent {
                 </span>
                 ": function("
                 { render_arguments(&callback.parameters) }
-                ")"
+                "): "
+                { render_type_link(&callback.return_type.name) }
             </div>
             { render_member_description(description, callback.description_source) }
         </div>
