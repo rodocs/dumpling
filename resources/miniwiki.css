@@ -155,6 +155,10 @@ a, a:visited {
 	padding-right: 1rem;
 }
 
+.dump-class-member-description-text,p {
+	margin-bottom: 0.25em
+}
+
 .dump-class-member-description-meta {
 	flex: 0 0 auto;
 }
