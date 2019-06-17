@@ -73,11 +73,11 @@ fn apply_devhub(dump: &mut Dump, content: &DevHubData) {
 }
 
 fn load_combined_dump(
-    dump_path: &Path,
+    dump_path: Option<&Path>,
     reflection_metadata_path: Option<&Path>,
     content_path: &Path,
 ) -> Dump {
-    let mut dump = Dump::read_from_file(dump_path)
+    let mut dump = Dump::read(dump_path)
         .expect("Could not load JSON API dump");
 
     let metadata = ReflectionMetadata::read(reflection_metadata_path)
@@ -100,7 +100,7 @@ fn load_combined_dump(
 
 struct MiniwikiOptions<'a> {
     output_path: &'a Path,
-    dump_path: &'a Path,
+    dump_path: Option<&'a Path>,
     metadata_path: Option<&'a Path>,
     content_path: &'a Path,
 }
@@ -118,7 +118,7 @@ fn miniwiki(options: &MiniwikiOptions) {
 
 struct MegadumpOptions<'a> {
     output_path: &'a Path,
-    dump_path: &'a Path,
+    dump_path: Option<&'a Path>,
     metadata_path: Option<&'a Path>,
     content_path: &'a Path,
 }
@@ -137,7 +137,6 @@ fn main() {
     let dump_arg = Arg::with_name("dump")
         .long("dump")
         .help("The location of the Roblox JSON API dump")
-        .required(true)
         .takes_value(true);
 
     let metadata_arg = Arg::with_name("metadata")
@@ -183,7 +182,7 @@ fn main() {
         ("miniwiki", command_matches) => {
             let command_matches = command_matches.unwrap();
             let output_path = Path::new(command_matches.value_of("output").unwrap());
-            let dump_path = Path::new(command_matches.value_of("dump").unwrap());
+            let dump_path = command_matches.value_of("dump").map(Path::new);
             let metadata_path = command_matches.value_of("metadata").map(Path::new);
             let content_path = Path::new(command_matches.value_of("content").unwrap());
 
@@ -197,7 +196,7 @@ fn main() {
         ("megadump", command_matches) => {
             let command_matches = command_matches.unwrap();
             let output_path = Path::new(command_matches.value_of("output").unwrap());
-            let dump_path = Path::new(command_matches.value_of("dump").unwrap());
+            let dump_path = command_matches.value_of("dump").map(Path::new);
             let metadata_path = command_matches.value_of("metadata").map(Path::new);
             let content_path = Path::new(command_matches.value_of("content").unwrap());
 
