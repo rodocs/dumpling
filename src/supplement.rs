@@ -83,14 +83,26 @@ fn read_item_descriptions_from_path(path: &Path, output: &mut HashMap<String, It
     let metadata = fs::metadata(path)?;
 
     if metadata.is_file() {
-        let contents = fs::read_to_string(path)?;
-        parse_item_descriptions(&contents, output)?;
+        // Only parse .md files.
+        if let Some(extension) = path.extension() {
+            if extension.to_str().expect("File extension was not valid UTF-8.") == "md" {
+                let contents = fs::read_to_string(path)?;
+                parse_item_descriptions(&contents, output)?;
+            }
+        }
 
         Ok(())
     } else if metadata.is_dir() {
         for entry in fs::read_dir(path)? {
             let entry = entry?;
             let entry_path = entry.path();
+
+            // Skip dot directories like ".git"
+            if let Some(entry_name) = path.file_name() {
+                if entry_name.to_str().expect("Directory name was not valid UTF-8.").starts_with(".") {
+                    return Ok(());
+                }
+            }
 
             read_item_descriptions_from_path(&entry_path, output)?;
         }
