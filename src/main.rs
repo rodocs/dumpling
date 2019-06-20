@@ -20,7 +20,7 @@ use clap::{
 };
 
 use crate::{
-    dump::{Dump, ContentSource},
+    dump::{Dump, ContentSource, DumpClassMember},
     supplement::SupplementalData,
     reflection_metadata::ReflectionMetadata,
     dump_devhub::DevHubData,
@@ -49,10 +49,38 @@ fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
 
 fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
     for class in dump.classes.iter_mut() {
-        // TODO: Apply descriptions for instance members too
         if let Some(description) = content.item_descriptions.get(&class.name) {
             class.description = Some(description.prose.clone());
             class.description_source = Some(ContentSource::Supplemental);
+        }
+
+        for member in class.members.iter_mut() {
+            match member {
+                DumpClassMember::Function(function) => {
+                    if let Some(description) = content.item_descriptions.get(&format!("{}.{}", &class.name, &function.name)) {
+                        function.description = Some(description.prose.clone());
+                        function.description_source = Some(ContentSource::Supplemental);
+                    }
+                },
+                DumpClassMember::Property(property) => {
+                    if let Some(description) = content.item_descriptions.get(&format!("{}.{}", &class.name, &property.name)) {
+                        property.description = Some(description.prose.clone());
+                        property.description_source = Some(ContentSource::Supplemental);
+                    }
+                },
+                DumpClassMember::Event(event) => {
+                    if let Some(description) = content.item_descriptions.get(&format!("{}.{}", &class.name, &event.name)) {
+                        event.description = Some(description.prose.clone());
+                        event.description_source = Some(ContentSource::Supplemental);
+                    }
+                },
+                DumpClassMember::Callback(callback) => {
+                    if let Some(description) = content.item_descriptions.get(&format!("{}.{}", &class.name, &callback.name)) {
+                        callback.description = Some(description.prose.clone());
+                        callback.description_source = Some(ContentSource::Supplemental);
+                    }
+                },
+            }
         }
     }
 }
