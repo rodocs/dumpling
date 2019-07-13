@@ -57,6 +57,7 @@ pub struct ItemDescription {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct Metadata {
     pub target: String,
 }
