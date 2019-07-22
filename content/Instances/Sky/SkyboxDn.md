@@ -1,0 +1,6 @@
++++
+Target = "Sky.SkyboxDn"
+Type = string
++++
+
+The URL asset link to a picture for the Bottom surface of the sky.

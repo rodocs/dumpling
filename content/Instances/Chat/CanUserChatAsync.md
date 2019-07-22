@@ -1,0 +1,6 @@
++++
+Target = "Chat.CanUserChatAsync"
+Type = (userId: number) => boolean
++++
+
+Will return false if the player with the specified [Player.UserId](https://developer.roblox.com/api-reference/property/Player/UserId) is not allowed to chat because of their account settings.

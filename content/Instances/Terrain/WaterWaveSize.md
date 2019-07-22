@@ -1,0 +1,6 @@
++++
+Target = "Terrain.WaterWaveSize"
+Type = number
++++
+
+Sets the maximum height of the Terrain water waves in studs. This is currently constrained to between 0 and 1.

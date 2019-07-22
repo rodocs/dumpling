@@ -1,0 +1,6 @@
++++
+Target = "GuiButton.AutoButtonColor"
+Type = boolean
++++
+
+If true, the button will automatically change color when the mouse hovers over or clicks on it.

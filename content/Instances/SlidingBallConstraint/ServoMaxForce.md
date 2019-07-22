@@ -1,0 +1,6 @@
++++
+Target = "SlidingBallConstraint.ServoMaxForce"
+Type = number
++++
+
+The maximum force a `SlidingBallConstraint` with [SlidingBallConstraint.ActuatorType](https://developer.roblox.com/api-reference/property/SlidingBallConstraint/ActuatorType) set to [Enum.ActuatorType](https://developer.roblox.com/search#stq=ActuatorType) can apply when trying to reach its desired [SlidingBallConstraint.Speed](https://developer.roblox.com/api-reference/property/SlidingBallConstraint/Speed).

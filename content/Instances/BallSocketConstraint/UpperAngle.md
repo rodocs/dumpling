@@ -1,0 +1,6 @@
++++
+Target = "BallSocketConstraint.UpperAngle"
+Type = number
++++
+
+Sets the upper rotation limit of the BallSocketConstraint, as long as [BallSocketConstraint.LimitsEnabled](https://developer.roblox.com/api-reference/property/BallSocketConstraint/LimitsEnabled) is `true`.

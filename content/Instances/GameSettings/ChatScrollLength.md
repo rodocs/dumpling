@@ -1,0 +1,6 @@
++++
+Target = "GameSettings.ChatScrollLength"
+Type = number
++++
+
+The maximum number of chats that can stack and show on the screen. Does not seem to work because the chat gui's code does not read from here.

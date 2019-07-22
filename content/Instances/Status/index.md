@@ -1,0 +1,5 @@
++++
+Target = "Status"
++++
+
+Used as a storage for custom Humanoid statuses. This object would've been officially used in the RbxStatus library, but remains unfinished.

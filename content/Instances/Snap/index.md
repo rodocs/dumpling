@@ -1,0 +1,5 @@
++++
+Target = "Snap"
++++
+
+A Snap object holds two objects rigidly together. Most commonly created when [BasePart.MakeJoints](https://developer.roblox.com/api-reference/function/BasePart/MakeJoints) is called on parts where Inlet and Stud [Enum.SurfaceType](https://developer.roblox.com/search#stq=SurfaceType) are touching. Functionally identical to `Weld`.

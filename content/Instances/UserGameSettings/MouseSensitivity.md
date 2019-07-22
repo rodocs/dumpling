@@ -1,0 +1,6 @@
++++
+Target = "UserGameSettings.MouseSensitivity"
+Type = number
++++
+
+A [float](https://developer.roblox.com/articles/Numbers) representing the sensitivity of the client's mouse.

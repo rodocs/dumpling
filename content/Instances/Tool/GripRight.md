@@ -1,0 +1,6 @@
++++
+Target = "Tool.GripRight"
+Type = Vector3
++++
+
+One of the properties that specifies a Tool's orientation in a character's hand. This represents the R00, R10, and R20 values of the Grip CFrame's rotation matrix.

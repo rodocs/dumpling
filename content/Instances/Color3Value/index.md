@@ -1,0 +1,5 @@
++++
+Target = "Color3Value"
++++
+
+A container object for a single [DataType.Color3](https://developer.roblox.com/search#stq=Color3) value.

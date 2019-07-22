@@ -1,0 +1,5 @@
++++
+Target = "AnimationTrack"
++++
+
+Controls the playback of an animation on a `Humanoid` or `AnimationController`. This object cannot be created, instead it is returned by the [Humanoid.LoadAnimation](https://developer.roblox.com/api-reference/function/Humanoid/LoadAnimation) method.

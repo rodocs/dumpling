@@ -1,0 +1,5 @@
++++
+Target = "SlidingBallConstraint"
++++
+
+The base class for constraints that allow their attachments to slide along an axis.

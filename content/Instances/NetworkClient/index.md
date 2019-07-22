@@ -1,0 +1,5 @@
++++
+Target = "NetworkClient"
++++
+
+This service is responsible for connecting a client to a server.

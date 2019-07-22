@@ -1,0 +1,6 @@
++++
+Target = "Feature.InOut"
+Type = Enum.InOut
++++
+
+Controls how the Feature is positioned on it's parent's surface, in correspondence to the Feature's [Feature.LeftRight](https://developer.roblox.com/api-reference/property/Feature/LeftRight) and [Feature.TopBottom](https://developer.roblox.com/api-reference/property/Feature/TopBottom) properties.

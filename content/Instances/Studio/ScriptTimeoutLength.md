@@ -1,0 +1,6 @@
++++
+Target = "Studio.ScriptTimeoutLength"
+Type = number
++++
+
+The time (in seconds) a script can wait to be resumed before timing out.

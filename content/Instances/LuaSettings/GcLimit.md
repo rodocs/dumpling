@@ -1,0 +1,6 @@
++++
+Target = "LuaSettings.GcLimit"
+Type = number
++++
+
+The ideal limit above which Roblox triggers aggressive garbage collection, in average KB per [LuaSettings.GcFrequency](https://developer.roblox.com/api-reference/property/LuaSettings/GcFrequency).

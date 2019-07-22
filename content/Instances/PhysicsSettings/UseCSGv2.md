@@ -1,0 +1,6 @@
++++
+Target = "PhysicsSettings.UseCSGv2"
+Type = boolean
++++
+
+If set to true, version 2 of Roblox's CSG solver will be used instead of version 1.

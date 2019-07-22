@@ -1,0 +1,6 @@
++++
+Target = "SpringConstraint.MinLength"
+Type = number
++++
+
+The minimum separation the `SpringConstraint` will allow if [SpringConstraint.LimitsEnabled](https://developer.roblox.com/api-reference/property/SpringConstraint/LimitsEnabled) is true.

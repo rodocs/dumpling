@@ -1,0 +1,5 @@
++++
+Target = "LoginService"
++++
+
+An unfinished service which apparently would have allowed a user to login from within a place.

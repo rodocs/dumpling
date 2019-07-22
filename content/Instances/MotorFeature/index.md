@@ -1,0 +1,5 @@
++++
+Target = "MotorFeature"
++++
+
+A MotorFeature is an unused type of surface joint. It can be connected to a `Hole` object by using a `VelocityMotor`.

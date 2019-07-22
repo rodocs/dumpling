@@ -1,0 +1,6 @@
++++
+Target = "UserGameSettings.InStudioMode"
+Type = () => boolean
++++
+
+Returns true if the client's game session is in Roblox Studio.

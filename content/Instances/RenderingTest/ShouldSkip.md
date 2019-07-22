@@ -1,0 +1,6 @@
++++
+Target = "RenderingTest.ShouldSkip"
+Type = boolean
++++
+
+Indicates whether or not this RenderingTest should be skipped.

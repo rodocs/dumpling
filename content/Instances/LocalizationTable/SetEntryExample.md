@@ -1,0 +1,6 @@
++++
+Target = "LocalizationTable.SetEntryExample"
+Type = (key: string, source: string, context: string, example: string) => void
++++
+
+Sets the **Example** field of a LocalizationTable entry to _example_, using the specified _key_, _source_, and _context_ to narrow down the entry that will have this change applied.

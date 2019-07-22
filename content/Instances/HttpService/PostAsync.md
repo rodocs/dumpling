@@ -1,0 +1,7 @@
++++
+Target = "HttpService.PostAsync"
+Type = { (url: string, data: string, content_type?: 0 | 1 | 2 | 3 | 4 | Enum.HttpContentType.ApplicationJson | Enum.HttpContentType.ApplicationXml | Enum.HttpContentType.ApplicationUrlEncoded | Enum.HttpContentType.TextPlain | Enum.HttpContentType.TextXml | "ApplicationJson" | "ApplicationXml" | "ApplicationUrlEncoded" | "TextPlain" | "TextXml" | undefined, compress?: boolean | undefined, headers?: HttpHeaders | undefined): string; (url: string, data: string, content_type?: 0 | 1 | 2 | 3 | 4 | Enum.HttpContentType.ApplicationJson | Enum.HttpContentType.ApplicationXml | Enum.HttpContentType.ApplicationUrlEncoded | Enum.HttpContentType.TextPlain | Enum.HttpContentType.TextXml | "ApplicationJson" | "ApplicationXml" | "ApplicationUrlEncoded" | "TextPlain" | "TextXml" | undefined, compress?: boolean | undefined, headers?: HttpHeaders | undefined): string; }
+Tags = "Server"
++++
+
+Send an HTTP POST request, blocking the current thread until a response is received. Certain HTTP response codes (like 404 or 403) will raise errors.  A useful endpoint that can help you debug POST requests is https://httpbin.org/post. It provides a JSON response with information about a POST request, such as headers and URL arguments.

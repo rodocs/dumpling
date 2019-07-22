@@ -1,0 +1,6 @@
++++
+Target = "BasePart.GetRootPart"
+Type = { (): BasePart; (): BasePart; }
++++
+
+Returns the base part of an assembly (a collection of parts connected together). When moving an assembly of parts using a [CFrame](https://developer.roblox.com/api-reference/datatype/CFrame) it is important to move this base part (this will move all other parts connected to it accordingly.@returns The base part of an assembly (a collection of parts connected together)

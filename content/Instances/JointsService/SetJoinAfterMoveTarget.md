@@ -1,0 +1,6 @@
++++
+Target = "JointsService.SetJoinAfterMoveTarget"
+Type = { (joinTarget: PVInstance): void; (joinTarget: PVInstance): void; }
++++
+
+Sets the PVInstance that will be connected with the PVInstance specified by [SetJoinAfterMoveInstance](https://developer.roblox.com/api-reference/function/JointsService/SetJoinAfterMoveInstance).

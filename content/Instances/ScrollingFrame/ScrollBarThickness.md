@@ -1,0 +1,6 @@
++++
+Target = "ScrollingFrame.ScrollBarThickness"
+Type = number
++++
+
+How thick the scroll bar appears. This applies to both the horizontal and vertical scroll bars. If set to 0, no scroll bars are rendered.

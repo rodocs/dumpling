@@ -1,0 +1,6 @@
++++
+Target = "Trail.LightInfluence"
+Type = number
++++
+
+The LightInfluence property sets how much the trail is influenced by the lighting around it. The property can be set to a value from 0 to 1, with 1 being the most influenced and 0 be the least influenced.

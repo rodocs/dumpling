@@ -1,0 +1,6 @@
++++
+Target = "Studio.["Animate Hover Over"]"
+Type = boolean
++++
+
+If set to true, the hover selection box that is shown when mousing over selectable objects in the `Workspace` will flash between [Studio.Hover Over Color](https://developer.roblox.com/api-reference/property/Studio/Hover) and [Studio.Select Color](https://developer.roblox.com/api-reference/property/Studio/Select) based on the [Studio.Hover Animate Speed](https://developer.roblox.com/api-reference/property/Studio/Hover).

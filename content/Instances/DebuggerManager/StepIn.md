@@ -1,0 +1,6 @@
++++
+Target = "DebuggerManager.StepIn"
+Type = () => void
++++
+
+Performs a [step into](https://developer.roblox.com/articles/Lua-debugger) operation on the Lua Debugger.

@@ -1,0 +1,6 @@
++++
+Target = "BodyColors.HeadColor3"
+Type = Color3
++++
+
+Sets the color of this limb, as a [Color3](https://developer.roblox.com/api-reference/datatype/Color3).

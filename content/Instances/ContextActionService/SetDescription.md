@@ -1,0 +1,6 @@
++++
+Target = "ContextActionService.SetDescription"
+Type = (actionName: string, description: string) => void
++++
+
+If _actionName_ key contains a bound action, then _description_ is set as the description of the bound action. This description will appear for users in a listing of current actions available.

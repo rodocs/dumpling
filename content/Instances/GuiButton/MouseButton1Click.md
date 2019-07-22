@@ -1,0 +1,6 @@
++++
+Target = "GuiButton.MouseButton1Click"
+Type = RBXScriptSignal<() => void, false>
++++
+
+Fired when the mouse has fully left clicked the GUI object. By clicking, the mouse has to be in bounds of the button and has to be pressed down and up again before this event fires.

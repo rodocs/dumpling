@@ -1,0 +1,5 @@
++++
+Target = "PartOperation"
++++
+
+An abstract class that all [solid modeling](https://developer.roblox.com/articles/3D-Modeling-with-Parts) based parts inherit from.

@@ -1,0 +1,6 @@
++++
+Target = "Dragger.MouseUp"
+Type = () => void
++++
+
+Stops the current dragging action (made by [MouseDown](https://developer.roblox.com/api-reference/function/Dragger/MouseDown))

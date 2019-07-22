@@ -1,0 +1,5 @@
++++
+Target = "ManualSurfaceJointInstance"
++++
+
+The ManualSurfaceJointInstance is the base class for `ManualGlue`. This instance (when created) also used to cause the server to crash, however this behaviour has since been fixed.

@@ -1,0 +1,5 @@
++++
+Target = "CharacterAppearance"
++++
+
+Base class for objects that change a character's appearance.
