@@ -186,7 +186,7 @@ fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> Ht
                 </a>
                 "("
                 { render_arguments(&function.parameters) }
-                "): "
+                ") => "
                 { render_type_link(&function.return_type.name) }
             </div>
             { render_member_description(description, function.description_source) }
@@ -235,7 +235,7 @@ fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> Ht
                 </a>
                 ": function("
                 { render_arguments(&callback.parameters) }
-                "): "
+                ") => "
                 { render_type_link(&callback.return_type.name) }
             </div>
             { render_member_description(description, callback.description_source) }
