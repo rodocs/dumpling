@@ -240,7 +240,7 @@ pub struct DumpClassFunction {
 
     pub parameters: Vec<DumpFunctionParameter>,
 
-    pub return_type: DumpType,
+    pub return_type: DumpReturnType,
 
     pub security: String,
 
@@ -280,7 +280,7 @@ pub struct DumpClassCallback {
 
     pub parameters: Vec<DumpFunctionParameter>,
 
-    pub return_type: DumpType,
+    pub return_type: DumpReturnType,
 
     pub security: String,
 
@@ -325,4 +325,11 @@ pub struct DumpEnum {
 pub struct DumpEnumItem {
     pub name: String,
     pub value: u32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum DumpReturnType {
+    Single(DumpType),
+    Multiple(Vec<DumpType>),
 }

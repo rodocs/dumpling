@@ -20,7 +20,7 @@ use clap::{
 };
 
 use crate::{
-    dump::{Dump, ContentSource, DumpClassMember},
+    dump::{Dump, ContentSource, DumpClassMember, DumpType, DumpReturnType},
     supplement::SupplementalData,
     reflection_metadata::ReflectionMetadata,
     dump_devhub::DevHubData,
@@ -47,6 +47,18 @@ fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
     }
 }
 
+fn simple_name_to_dump_type(name: &String) -> DumpType {
+    let mut n: &str = name;
+    let c = String::from(if name.starts_with("Enum.") {
+        n = &name[5..];
+        "Enum"
+    } else {
+        // TODO: Primitive, Class, and DataType. Also generic Group types. Not sure what to do with unique tables.
+        "TODO"
+    });
+    DumpType { name: String::from(n), category: c }
+}
+
 fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
     for class in dump.classes.iter_mut() {
         if let Some(description) = content.item_descriptions.get(&class.name) {
@@ -60,6 +72,10 @@ fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
                     if let Some(description) = content.item_descriptions.get(&format!("{}.{}", &class.name, &function.name)) {
                         function.description = Some(description.prose.clone());
                         function.description_source = Some(ContentSource::Supplemental);
+
+                        if let Some(type_names) = &description.metadata.return_types {
+                            function.return_type = DumpReturnType::Multiple(type_names.iter().map(simple_name_to_dump_type).collect());
+                        }
                     }
                 },
                 DumpClassMember::Property(property) => {

@@ -14,7 +14,8 @@ use crate::{
         DumpClassEvent,
         DumpClassFunction,
         DumpClassProperty,
-        DumpFunctionParameter
+        DumpFunctionParameter,
+        DumpReturnType,
     },
 };
 
@@ -187,7 +188,7 @@ fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> Ht
                 "("
                 { render_arguments(&function.parameters) }
                 ") => "
-                { render_type_link(&function.return_type.name) }
+                { render_return_type(&function.return_type) }
             </div>
             { render_member_description(description, function.description_source) }
         </div>
@@ -236,7 +237,7 @@ fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> Ht
                 ": function("
                 { render_arguments(&callback.parameters) }
                 ") => "
-                { render_type_link(&callback.return_type.name) }
+                { render_return_type(&callback.return_type) }
             </div>
             { render_member_description(description, callback.description_source) }
         </div>
@@ -256,6 +257,35 @@ fn render_member_description(description: &str, source: Option<ContentSource>) -
             </div>
         </div>
     )
+}
+
+fn render_return_type(return_type: &DumpReturnType) -> HtmlContent {
+    match return_type {
+        DumpReturnType::Single(t) => render_type_link(&t.name),
+        DumpReturnType::Multiple(ts) => html!(
+            <span>
+            "("
+            {
+                Fragment::new(ts
+                .iter()
+                .enumerate()
+                .map(|(index, param)| html!(
+                    <span class="dump-function-return-type">
+                        { render_type_link(&param.name) }
+                        {
+                            if index < ts.len() - 1 {
+                                ", ".into()
+                            } else {
+                                HtmlContent::None
+                            }
+                        }
+                    </span>
+                )))
+            }
+            ")"
+            </span>
+        ),
+    }
 }
 
 fn render_type_link(name: &str) -> HtmlContent {

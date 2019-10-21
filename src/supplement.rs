@@ -60,6 +60,7 @@ pub struct ItemDescription {
 #[serde(rename_all = "PascalCase")]
 pub struct Metadata {
     pub target: String,
+    pub return_types: Option<Vec<String>>,
 }
 
 #[derive(Debug)]
