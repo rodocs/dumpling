@@ -43,6 +43,7 @@ pub fn camelcase_members_probably_deprecated(dump: &mut Dump) {
 
             let description = format!("`{}` is deprecated. Use `{}` instead.", member.get_name(), fixed_name);
             member.set_description(description, ContentSource::Heuristic);
+            member.add_tag("Deprecated");
         }
     }
 }
