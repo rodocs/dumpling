@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    collections::BTreeSet,
     fmt,
     fs,
     io,
@@ -103,8 +104,8 @@ pub struct DumpClass {
 
     pub members: Vec<DumpClassMember>,
 
-    #[serde(default = "Vec::new")]
-    pub tags: Vec<String>,
+    #[serde(default)]
+    pub tags: BTreeSet<String>,
 
     pub superclass: Option<String>,
 
@@ -223,10 +224,7 @@ impl DumpClassMember {
                 &mut inner.tags
             },
         };
-        let tag: String = tag.to_owned();
-        if !tags.contains(&tag) {
-            tags.push(tag)
-        }
+        tags.insert(tag.to_owned());
     }
 }
 
@@ -235,8 +233,8 @@ impl DumpClassMember {
 pub struct DumpClassProperty {
     pub name: String,
 
-    #[serde(default = "Vec::new")]
-    pub tags: Vec<String>,
+    #[serde(default)]
+    pub tags: BTreeSet<String>,
 
     pub value_type: DumpType,
 
@@ -256,8 +254,8 @@ pub struct DumpClassProperty {
 pub struct DumpClassFunction {
     pub name: String,
 
-    #[serde(default = "Vec::new")]
-    pub tags: Vec<String>,
+    #[serde(default)]
+    pub tags: BTreeSet<String>,
 
     pub parameters: Vec<DumpFunctionParameter>,
 
@@ -277,8 +275,8 @@ pub struct DumpClassFunction {
 pub struct DumpClassEvent {
     pub name: String,
 
-    #[serde(default = "Vec::new")]
-    pub tags: Vec<String>,
+    #[serde(default)]
+    pub tags: BTreeSet<String>,
 
     pub parameters: Vec<DumpFunctionParameter>,
 
@@ -296,8 +294,8 @@ pub struct DumpClassEvent {
 pub struct DumpClassCallback {
     pub name: String,
 
-    #[serde(default = "Vec::new")]
-    pub tags: Vec<String>,
+    #[serde(default)]
+    pub tags: BTreeSet<String>,
 
     pub parameters: Vec<DumpFunctionParameter>,
 

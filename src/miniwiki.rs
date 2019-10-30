@@ -1,4 +1,5 @@
 use std::{
+    collections::BTreeSet,
     fmt::{self, Write},
 };
 
@@ -58,8 +59,8 @@ fn render_class(class: &DumpClass) -> HtmlContent {
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
-    let mut element_class: String = "dump-class".to_owned();
-    if class.tags.contains(&"Deprecated".to_owned())
+    let mut element_class = "dump-class".to_owned();
+    if class.tags.contains("Deprecated")
     {
         element_class.push_str(" dump-class-deprecated");
     }
@@ -81,7 +82,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                 html!(
                      <p class="dump-class-tags">
                         "Tags: "
-                        { class.tags.join(", ") }
+                        { class.tags.iter().map(|value| value.as_str()).collect::<Vec<_>>().join(", ")}
                      </p>
                 )
             } else {
@@ -292,10 +293,10 @@ fn render_arguments(parameters: &Vec<DumpFunctionParameter>) -> Fragment {
         )))
 }
 
-fn member_element_class<'a>(tags: &'a Vec<String>, main_class: &str) -> String {
-    let mut element_class: String = "dump-class-member ".to_owned();
+fn member_element_class(tags: &BTreeSet<String>, main_class: &str) -> String {
+    let mut element_class = "dump-class-member ".to_owned();
     element_class.push_str(main_class);
-    if tags.contains(&"Deprecated".to_owned())
+    if tags.contains("Deprecated")
     {
         element_class.push_str(" dump-member-deprecated");
     }
