@@ -28,8 +28,7 @@ pub fn camelcase_members_probably_deprecated(dump: &mut Dump) {
                 let has_pascal_version = class
                     .members
                     .iter()
-                    .position(|member| member.get_name() == fixed_name)
-                    .is_some();
+                    .any(|member| member.get_name() == fixed_name);
 
                 if has_pascal_version {
                     fixups.push((index, fixed_name));

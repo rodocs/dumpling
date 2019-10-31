@@ -21,29 +21,26 @@ use crate::{
 
 fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
     for class in dump.classes.iter_mut() {
-        match metadata.classes.get(&class.name) {
-            Some(metadata_class) => {
-                if metadata_class.summary.len() > 0 {
-                    class.description = Some(metadata_class.summary.clone());
-                }
+        if let Some(metadata_class) = metadata.classes.get(&class.name) {
+            if !metadata_class.summary.is_empty() {
+                class.description = Some(metadata_class.summary.clone());
+            }
 
-                for member in class.members.iter_mut() {
-                    if let Some(meta_member) = metadata_class.members.get(member.get_name()) {
-                        if meta_member.summary.len() > 0 {
-                            member.set_description(
-                                meta_member.summary.clone(),
-                                ContentSource::ReflectionMetadata,
-                            );
-                        }
+            for member in class.members.iter_mut() {
+                if let Some(meta_member) = metadata_class.members.get(member.get_name()) {
+                    if !meta_member.summary.is_empty() {
+                        member.set_description(
+                            meta_member.summary.clone(),
+                            ContentSource::ReflectionMetadata,
+                        );
                     }
                 }
             }
-            None => {}
         }
     }
 }
 
-fn simple_name_to_dump_type(name: &String) -> DumpType {
+fn simple_name_to_dump_type(name: &str) -> DumpType {
     let mut n: &str = name;
     let c = String::from(if name.starts_with("Enum.") {
         n = &name[5..];
@@ -77,7 +74,10 @@ fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
 
                         if let Some(type_names) = &description.metadata.return_types {
                             function.return_type = DumpReturnType::Multiple(
-                                type_names.iter().map(simple_name_to_dump_type).collect(),
+                                type_names
+                                    .iter()
+                                    .map(|simple_name| simple_name_to_dump_type(&simple_name))
+                                    .collect(),
                             );
                         }
                     }
@@ -114,6 +114,7 @@ fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
     }
 }
 
+#[allow(dead_code)]
 fn apply_devhub(dump: &mut Dump, content: &DevHubData) {
     for devhub_class in content.classes.values() {
         if let Some(dump_class) = dump

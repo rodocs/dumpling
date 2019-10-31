@@ -104,7 +104,7 @@ fn read_item_descriptions_from_path(
                 if entry_name
                     .to_str()
                     .expect("Directory name was not valid UTF-8.")
-                    .starts_with(".")
+                    .starts_with('.')
                 {
                     return Ok(());
                 }
@@ -137,29 +137,24 @@ fn parse_item_descriptions(
 ) -> Result<(), ParseError> {
     let mut fence_locations = source.match_indices(METADATA_FENCE).peekable();
 
-    loop {
-        match fence_locations.next() {
-            Some((start_index, fence)) => {
-                let (end_index, _) = fence_locations
-                    .next()
-                    .ok_or(ParseError::UnclosedMetadataBlock)?;
+    while let Some((start_index, fence)) = fence_locations.next() {
+        let (end_index, _) = fence_locations
+            .next()
+            .ok_or(ParseError::UnclosedMetadataBlock)?;
 
-                let metadata_source = &source[(start_index + fence.len())..end_index].trim();
-                let metadata: Metadata = toml::from_str(metadata_source)?;
+        let metadata_source = &source[(start_index + fence.len())..end_index].trim();
+        let metadata: Metadata = toml::from_str(metadata_source)?;
 
-                let prose_after_end_index = match fence_locations.peek() {
-                    Some((index, _)) => *index,
-                    None => source.len(),
-                };
+        let prose_after_end_index = match fence_locations.peek() {
+            Some((index, _)) => *index,
+            None => source.len(),
+        };
 
-                let prose = source[(end_index + fence.len())..prose_after_end_index]
-                    .trim()
-                    .to_string();
+        let prose = source[(end_index + fence.len())..prose_after_end_index]
+            .trim()
+            .to_string();
 
-                output.insert(metadata.target.clone(), ItemDescription { metadata, prose });
-            }
-            None => break,
-        }
+        output.insert(metadata.target.clone(), ItemDescription { metadata, prose });
     }
 
     Ok(())

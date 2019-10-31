@@ -301,7 +301,7 @@ fn render_type_link(name: &str) -> HtmlContent {
     )
 }
 
-fn render_arguments(parameters: &Vec<DumpFunctionParameter>) -> Fragment {
+fn render_arguments(parameters: &[DumpFunctionParameter]) -> Fragment {
     Fragment::new(parameters.iter().enumerate().map(|(index, param)| {
         html!(
             <div class="dump-function-argument">
@@ -326,5 +326,5 @@ fn member_element_class(tags: &BTreeSet<String>, main_class: &str) -> String {
     if tags.contains("Deprecated") {
         element_class.push_str(" dump-member-deprecated");
     }
-    return element_class;
+    element_class
 }

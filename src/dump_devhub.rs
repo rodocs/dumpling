@@ -6,6 +6,7 @@ pub struct DevHubData {
     pub classes: HashMap<String, DevHubClass>,
 }
 
+#[allow(dead_code)]
 impl DevHubData {
     pub fn fetch(dump: &Dump) -> DevHubData {
         let mut classes = HashMap::new();
@@ -31,6 +32,7 @@ pub struct DevHubProperty {
     pub description: String,
 }
 
+#[allow(dead_code)]
 fn request_instance_page(name: &str) -> Option<devhub::InstancePage> {
     let url = format!(
         "https://developer.roblox.com/api-reference/class/{}.json",
@@ -60,7 +62,7 @@ fn instance_page_to_class(page: &devhub::InstancePage) -> DevHubClass {
             description: property
                 .description
                 .as_ref()
-                .map(|v| v.clone())
+                .cloned()
                 .unwrap_or_else(String::new),
         });
     }
@@ -70,7 +72,7 @@ fn instance_page_to_class(page: &devhub::InstancePage) -> DevHubClass {
         description: class
             .description
             .as_ref()
-            .map(|v| v.clone())
+            .cloned()
             .unwrap_or_else(String::new),
         properties,
     }

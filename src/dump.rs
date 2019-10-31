@@ -202,7 +202,7 @@ impl DumpClassMember {
     }
 
     pub fn add_tag(&mut self, tag: &str) {
-        let mut tags = match self {
+        let tags = match self {
             DumpClassMember::Property(inner) => &mut inner.tags,
             DumpClassMember::Function(inner) => &mut inner.tags,
             DumpClassMember::Event(inner) => &mut inner.tags,

@@ -25,12 +25,7 @@ impl XmlQuery {
     pub fn new(query: &[(&'static str, &[(&'static str, &'static str)])]) -> XmlQuery {
         let pieces = query
             .iter()
-            .map(|(tag_name, input_attributes)| {
-                (
-                    *tag_name,
-                    input_attributes.iter().cloned().collect::<Vec<_>>(),
-                )
-            })
+            .map(|(tag_name, input_attributes)| (*tag_name, input_attributes.to_vec()))
             .collect::<Vec<_>>();
 
         XmlQuery { pieces }
@@ -54,7 +49,7 @@ impl XmlQuery {
                 return false;
             }
 
-            if expected_attributes.len() > 0 {
+            if !expected_attributes.is_empty() {
                 let element_attributes = extract_attributes(reader, element.attributes());
 
                 for (key, expected_value) in expected_attributes {
@@ -70,7 +65,7 @@ impl XmlQuery {
             }
         }
 
-        return true;
+        true
     }
 }
 
