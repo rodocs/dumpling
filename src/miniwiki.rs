@@ -4,23 +4,17 @@ use std::{
 };
 
 use pulldown_cmark;
-use ritz::{html, UnescapedText, HtmlContent, Fragment};
+use ritz::{html, Fragment, HtmlContent, UnescapedText};
 
-use crate::{
-    dump::{
-        ContentSource,
-        Dump,
-        DumpClass,
-        DumpClassCallback,
-        DumpClassEvent,
-        DumpClassFunction,
-        DumpClassProperty,
-        DumpFunctionParameter,
-        DumpReturnType,
-    },
+use crate::dump::{
+    ContentSource, Dump, DumpClass, DumpClassCallback, DumpClassEvent, DumpClassFunction,
+    DumpClassProperty, DumpFunctionParameter, DumpReturnType,
 };
 
-static STYLE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/miniwiki.css"));
+static STYLE: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/resources/miniwiki.css"
+));
 
 static DEFAULT_DESCRIPTION: &str = "*No description available.*";
 
@@ -55,7 +49,8 @@ pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
 }
 
 fn render_class(class: &DumpClass) -> HtmlContent {
-    let description = class.description
+    let description = class
+        .description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
@@ -156,7 +151,8 @@ fn render_class(class: &DumpClass) -> HtmlContent {
 }
 
 fn render_property<'a>(property: &'a DumpClassProperty, parent_name: &str) -> HtmlContent<'a> {
-    let description = property.description
+    let description = property
+        .description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
@@ -178,7 +174,8 @@ fn render_property<'a>(property: &'a DumpClassProperty, parent_name: &str) -> Ht
 }
 
 fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> HtmlContent<'a> {
-    let description = function.description
+    let description = function
+        .description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
@@ -202,7 +199,8 @@ fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> Ht
 }
 
 fn render_event<'a>(event: &'a DumpClassEvent, parent_name: &str) -> HtmlContent<'a> {
-    let description = event.description
+    let description = event
+        .description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
@@ -227,7 +225,8 @@ fn render_event<'a>(event: &'a DumpClassEvent, parent_name: &str) -> HtmlContent
 }
 
 fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> HtmlContent<'a> {
-    let description = callback.description
+    let description = callback
+        .description
         .as_ref()
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
@@ -302,11 +301,9 @@ fn render_type_link(name: &str) -> HtmlContent {
     )
 }
 
-fn render_arguments(parameters: &Vec<DumpFunctionParameter>) -> Fragment {
-    Fragment::new(parameters
-        .iter()
-        .enumerate()
-        .map(|(index, param)| html!(
+fn render_arguments(parameters: &[DumpFunctionParameter]) -> Fragment {
+    Fragment::new(parameters.iter().enumerate().map(|(index, param)| {
+        html!(
             <div class="dump-function-argument">
                 { &param.name }
                 ": "
@@ -319,7 +316,8 @@ fn render_arguments(parameters: &Vec<DumpFunctionParameter>) -> Fragment {
                     }
                 }
             </div>
-        )))
+        )
+    }))
 }
 
 fn member_element_class(tags: &BTreeSet<String>, main_class: &str) -> String {
@@ -328,5 +326,5 @@ fn member_element_class(tags: &BTreeSet<String>, main_class: &str) -> String {
     if tags.contains("Deprecated") {
         element_class.push_str(" dump-member-deprecated");
     }
-    return element_class;
+    element_class
 }

@@ -43,7 +43,6 @@ mod test {
 
     #[test]
     fn deserialize() {
-        let _data: InstancePage = serde_json::from_str(EXAMPLE)
-            .unwrap();
+        let _data: InstancePage = serde_json::from_str(EXAMPLE).unwrap();
     }
 }

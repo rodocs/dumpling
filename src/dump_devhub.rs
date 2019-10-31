@@ -1,14 +1,12 @@
 use std::collections::HashMap;
 
-use crate::{
-    devhub,
-    dump::Dump,
-};
+use crate::{devhub, dump::Dump};
 
 pub struct DevHubData {
     pub classes: HashMap<String, DevHubClass>,
 }
 
+#[allow(dead_code)]
 impl DevHubData {
     pub fn fetch(dump: &Dump) -> DevHubData {
         let mut classes = HashMap::new();
@@ -19,9 +17,7 @@ impl DevHubData {
             }
         }
 
-        DevHubData {
-            classes,
-        }
+        DevHubData { classes }
     }
 }
 
@@ -36,8 +32,12 @@ pub struct DevHubProperty {
     pub description: String,
 }
 
+#[allow(dead_code)]
 fn request_instance_page(name: &str) -> Option<devhub::InstancePage> {
-    let url = format!("https://developer.roblox.com/api-reference/class/{}.json", name);
+    let url = format!(
+        "https://developer.roblox.com/api-reference/class/{}.json",
+        name
+    );
 
     println!("Requesting {}", url);
 
@@ -59,13 +59,21 @@ fn instance_page_to_class(page: &devhub::InstancePage) -> DevHubClass {
     for property in &class.property {
         properties.push(DevHubProperty {
             name: property.display_title.clone(),
-            description: property.description.as_ref().map(|v| v.clone()).unwrap_or_else(String::new),
+            description: property
+                .description
+                .as_ref()
+                .cloned()
+                .unwrap_or_else(String::new),
         });
     }
 
     DevHubClass {
         name: class.title.clone(),
-        description: class.description.as_ref().map(|v| v.clone()).unwrap_or_else(String::new),
+        description: class
+            .description
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(String::new),
         properties,
     }
 }

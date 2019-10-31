@@ -1,4 +1,4 @@
-#![recursion_limit="1024"]
+#![recursion_limit = "1024"]
 
 mod devhub;
 mod dump;
@@ -8,46 +8,39 @@ mod miniwiki;
 mod reflection_metadata;
 mod supplement;
 
-use std::{
-    fs,
-    path::Path,
-};
+use std::{fs, path::Path};
 
-use clap::{
-    App,
-    SubCommand,
-    Arg,
-};
+use clap::{App, Arg, SubCommand};
 
 use crate::{
-    dump::{Dump, ContentSource, DumpClassMember, DumpType, DumpReturnType},
-    supplement::SupplementalData,
-    reflection_metadata::ReflectionMetadata,
+    dump::{ContentSource, Dump, DumpClassMember, DumpReturnType, DumpType},
     dump_devhub::DevHubData,
+    reflection_metadata::ReflectionMetadata,
+    supplement::SupplementalData,
 };
 
 fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
     for class in dump.classes.iter_mut() {
-        match metadata.classes.get(&class.name) {
-            Some(metadata_class) => {
-                if metadata_class.summary.len() > 0 {
-                    class.description = Some(metadata_class.summary.clone());
-                }
+        if let Some(metadata_class) = metadata.classes.get(&class.name) {
+            if !metadata_class.summary.is_empty() {
+                class.description = Some(metadata_class.summary.clone());
+            }
 
-                for member in class.members.iter_mut() {
-                    if let Some(meta_member) = metadata_class.members.get(member.get_name()) {
-                        if meta_member.summary.len() > 0 {
-                            member.set_description(meta_member.summary.clone(), ContentSource::ReflectionMetadata);
-                        }
+            for member in class.members.iter_mut() {
+                if let Some(meta_member) = metadata_class.members.get(member.get_name()) {
+                    if !meta_member.summary.is_empty() {
+                        member.set_description(
+                            meta_member.summary.clone(),
+                            ContentSource::ReflectionMetadata,
+                        );
                     }
                 }
-            },
-            None => {},
+            }
         }
     }
 }
 
-fn simple_name_to_dump_type(name: &String) -> DumpType {
+fn simple_name_to_dump_type(name: &str) -> DumpType {
     let mut n: &str = name;
     let c = String::from(if name.starts_with("Enum.") {
         n = &name[5..];
@@ -56,7 +49,10 @@ fn simple_name_to_dump_type(name: &String) -> DumpType {
         // TODO: Primitive, Class, and DataType. Also generic Group types. Not sure what to do with unique tables.
         "TODO"
     });
-    DumpType { name: String::from(n), category: c }
+    DumpType {
+        name: String::from(n),
+        category: c,
+    }
 }
 
 fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
@@ -69,45 +65,70 @@ fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
         for member in class.members.iter_mut() {
             match member {
                 DumpClassMember::Function(function) => {
-                    if let Some(description) = content.item_descriptions.get(&format!("{}.{}", &class.name, &function.name)) {
+                    if let Some(description) = content
+                        .item_descriptions
+                        .get(&format!("{}.{}", &class.name, &function.name))
+                    {
                         function.description = Some(description.prose.clone());
                         function.description_source = Some(ContentSource::Supplemental);
 
                         if let Some(type_names) = &description.metadata.return_types {
-                            function.return_type = DumpReturnType::Multiple(type_names.iter().map(simple_name_to_dump_type).collect());
+                            function.return_type = DumpReturnType::Multiple(
+                                type_names
+                                    .iter()
+                                    .map(|simple_name| simple_name_to_dump_type(&simple_name))
+                                    .collect(),
+                            );
                         }
                     }
-                },
+                }
                 DumpClassMember::Property(property) => {
-                    if let Some(description) = content.item_descriptions.get(&format!("{}.{}", &class.name, &property.name)) {
+                    if let Some(description) = content
+                        .item_descriptions
+                        .get(&format!("{}.{}", &class.name, &property.name))
+                    {
                         property.description = Some(description.prose.clone());
                         property.description_source = Some(ContentSource::Supplemental);
                     }
-                },
+                }
                 DumpClassMember::Event(event) => {
-                    if let Some(description) = content.item_descriptions.get(&format!("{}.{}", &class.name, &event.name)) {
+                    if let Some(description) = content
+                        .item_descriptions
+                        .get(&format!("{}.{}", &class.name, &event.name))
+                    {
                         event.description = Some(description.prose.clone());
                         event.description_source = Some(ContentSource::Supplemental);
                     }
-                },
+                }
                 DumpClassMember::Callback(callback) => {
-                    if let Some(description) = content.item_descriptions.get(&format!("{}.{}", &class.name, &callback.name)) {
+                    if let Some(description) = content
+                        .item_descriptions
+                        .get(&format!("{}.{}", &class.name, &callback.name))
+                    {
                         callback.description = Some(description.prose.clone());
                         callback.description_source = Some(ContentSource::Supplemental);
                     }
-                },
+                }
             }
         }
     }
 }
 
+#[allow(dead_code)]
 fn apply_devhub(dump: &mut Dump, content: &DevHubData) {
     for devhub_class in content.classes.values() {
-        if let Some(dump_class) = dump.classes.iter_mut().find(|item| item.name == devhub_class.name) {
+        if let Some(dump_class) = dump
+            .classes
+            .iter_mut()
+            .find(|item| item.name == devhub_class.name)
+        {
             dump_class.description = Some(devhub_class.description.clone());
 
             for property in &devhub_class.properties {
-                if let Some(dump_member) = dump_class.properties_mut().find(|item| item.name == property.name) {
+                if let Some(dump_member) = dump_class
+                    .properties_mut()
+                    .find(|item| item.name == property.name)
+                {
                     dump_member.description = Some(property.description.clone());
                     dump_member.description_source = Some(ContentSource::DevHub);
                 }
@@ -121,14 +142,13 @@ fn load_combined_dump(
     reflection_metadata_path: Option<&Path>,
     content_path: &Path,
 ) -> Dump {
-    let mut dump = Dump::read(dump_path)
-        .expect("Could not load JSON API dump");
+    let mut dump = Dump::read(dump_path).expect("Could not load JSON API dump");
 
     let metadata = ReflectionMetadata::read(reflection_metadata_path)
         .expect("Could not load ReflectionMetadata!");
 
-    let content = SupplementalData::read_from_path(content_path)
-        .expect("Could not load content data");
+    let content =
+        SupplementalData::read_from_path(content_path).expect("Could not load content data");
 
     apply_reflection_metadata(&mut dump, &metadata);
     heuristics::camelcase_members_probably_deprecated(&mut dump);
@@ -150,14 +170,16 @@ struct MiniwikiOptions<'a> {
 }
 
 fn miniwiki(options: &MiniwikiOptions) {
-    let dump = load_combined_dump(options.dump_path, options.metadata_path, options.content_path);
+    let dump = load_combined_dump(
+        options.dump_path,
+        options.metadata_path,
+        options.content_path,
+    );
 
     let mut output = String::new();
-    miniwiki::emit_wiki(&dump, &mut output)
-        .expect("Could not generate Miniwiki");
+    miniwiki::emit_wiki(&dump, &mut output).expect("Could not generate Miniwiki");
 
-    fs::write(options.output_path, &output)
-        .expect("Could not write to output file");
+    fs::write(options.output_path, &output).expect("Could not write to output file");
 }
 
 struct MegadumpOptions<'a> {
@@ -168,13 +190,15 @@ struct MegadumpOptions<'a> {
 }
 
 fn megadump(options: &MegadumpOptions) {
-    let dump = load_combined_dump(options.dump_path, options.metadata_path, options.content_path);
+    let dump = load_combined_dump(
+        options.dump_path,
+        options.metadata_path,
+        options.content_path,
+    );
 
-    let output = serde_json::to_string(&dump)
-        .expect("Could not convert dump to JSON");
+    let output = serde_json::to_string(&dump).expect("Could not convert dump to JSON");
 
-    fs::write(options.output_path, &output)
-        .expect("Could not write to output file");
+    fs::write(options.output_path, &output).expect("Could not write to output file");
 }
 
 fn main() {
@@ -205,21 +229,22 @@ fn main() {
         .author(env!("CARGO_PKG_AUTHORS"))
         .version(env!("CARGO_PKG_VERSION"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
-
-        .subcommand(SubCommand::with_name("miniwiki")
-            .about("Generate a simple, single-page mini Roblox wiki")
-            .arg(dump_arg.clone())
-            .arg(metadata_arg.clone())
-            .arg(content_arg.clone())
-            .arg(output_arg.clone()))
-
-        .subcommand(SubCommand::with_name("megadump")
-            .about("Create an API dump file with additional data")
-            .arg(dump_arg.clone())
-            .arg(metadata_arg.clone())
-            .arg(content_arg.clone())
-            .arg(output_arg.clone()))
-
+        .subcommand(
+            SubCommand::with_name("miniwiki")
+                .about("Generate a simple, single-page mini Roblox wiki")
+                .arg(dump_arg.clone())
+                .arg(metadata_arg.clone())
+                .arg(content_arg.clone())
+                .arg(output_arg.clone()),
+        )
+        .subcommand(
+            SubCommand::with_name("megadump")
+                .about("Create an API dump file with additional data")
+                .arg(dump_arg.clone())
+                .arg(metadata_arg.clone())
+                .arg(content_arg.clone())
+                .arg(output_arg.clone()),
+        )
         .get_matches();
 
     match matches.subcommand() {
@@ -236,7 +261,7 @@ fn main() {
                 metadata_path,
                 content_path,
             });
-        },
+        }
         ("megadump", command_matches) => {
             let command_matches = command_matches.unwrap();
             let output_path = Path::new(command_matches.value_of("output").unwrap());
@@ -250,7 +275,7 @@ fn main() {
                 metadata_path,
                 content_path,
             });
-        },
+        }
         _ => eprintln!("{}", matches.usage()),
     }
 }

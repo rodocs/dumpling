@@ -1,9 +1,7 @@
 //! Contains heuristics to guess at and clean up content sourced from outside
 //! Dumping itself.
 
-use crate::{
-    dump::{ContentSource, Dump},
-};
+use crate::dump::{ContentSource, Dump};
 
 /// A handy function to capitalize a string, based on a good solution from:
 /// https://stackoverflow.com/a/38406885/802794
@@ -27,10 +25,10 @@ pub fn camelcase_members_probably_deprecated(dump: &mut Dump) {
                 let fixed_name = make_first_letter_uppercase(member.get_name());
 
                 // We should make sure a PascalCase version exists!
-                let has_pascal_version = class.members
+                let has_pascal_version = class
+                    .members
                     .iter()
-                    .position(|member| member.get_name() == fixed_name)
-                    .is_some();
+                    .any(|member| member.get_name() == fixed_name);
 
                 if has_pascal_version {
                     fixups.push((index, fixed_name));
@@ -41,7 +39,11 @@ pub fn camelcase_members_probably_deprecated(dump: &mut Dump) {
         for (index, fixed_name) in &fixups {
             let member = &mut class.members[*index];
 
-            let description = format!("`{}` is deprecated. Use `{}` instead.", member.get_name(), fixed_name);
+            let description = format!(
+                "`{}` is deprecated. Use `{}` instead.",
+                member.get_name(),
+                fixed_name
+            );
             member.set_description(description, ContentSource::Heuristic);
             member.add_tag("Deprecated");
         }
