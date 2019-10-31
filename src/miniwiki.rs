@@ -1,4 +1,5 @@
 use std::{
+    collections::BTreeSet,
     fmt::{self, Write},
 };
 
@@ -59,9 +60,14 @@ fn render_class(class: &DumpClass) -> HtmlContent {
         .map(String::as_str)
         .unwrap_or(DEFAULT_DESCRIPTION);
 
+    let mut element_class = "dump-class".to_owned();
+    if class.tags.contains("Deprecated") {
+        element_class.push_str(" dump-class-deprecated");
+    }
+
     html!(
-        <div class="dump-class">
-            <a class="dump-class-title" id={ &class.name } href={ format!("#{}", class.name) }>
+        <div id={ &class.name } class={ element_class }>
+            <a class="dump-class-title" href={ format!("#{}", class.name) }>
                 { &class.name }
             </a>
 
@@ -76,7 +82,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                 html!(
                      <p class="dump-class-tags">
                         "Tags: "
-                        { class.tags.join(", ") }
+                        { class.tags.iter().map(|value| value.as_str()).collect::<Vec<_>>().join(", ")}
                      </p>
                 )
             } else {
@@ -158,7 +164,7 @@ fn render_property<'a>(property: &'a DumpClassProperty, parent_name: &str) -> Ht
     let qualified_name = format!("{}.{}", parent_name, property.name);
 
     html!(
-        <div class="dump-class-member" id={ qualified_name.clone() }>
+        <div class={ member_element_class(&property.tags, "dump-class-property") } id={ qualified_name.clone() }>
             <div class="dump-class-property-signature">
                 <a class="dump-class-member-name" href={ format!("#{}", qualified_name) }>
                     { &property.name }
@@ -180,7 +186,7 @@ fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> Ht
     let qualified_name = format!("{}.{}", parent_name, function.name);
 
     html!(
-        <div class="dump-class-member dump-class-function" id={ qualified_name.clone() }>
+        <div class={ member_element_class(&function.tags, "dump-class-function") } id={ qualified_name.clone() }>
             <div class="dump-function-signature">
                 <a class="dump-class-member-name" href={ format!("#{}", qualified_name) }>
                     { &function.name }
@@ -204,7 +210,7 @@ fn render_event<'a>(event: &'a DumpClassEvent, parent_name: &str) -> HtmlContent
     let qualified_name = format!("{}.{}", parent_name, event.name);
 
     html!(
-        <div class="dump-class-member dump-class-event" id={ qualified_name.clone() }>
+        <div class={ member_element_class(&event.tags, "dump-class-event") } id={ qualified_name.clone() }>
             <div class="dump-function-signature">
                 <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
                     { &event.name }
@@ -229,7 +235,7 @@ fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> Ht
     let qualified_name = format!("{}.{}", parent_name, callback.name);
 
     html!(
-        <div class="dump-class-member dump-class-callback" id={ qualified_name.clone() }>
+        <div class={ member_element_class(&callback.tags, "dump-class-callback") } id={ qualified_name.clone() }>
             <div class="dump-function-signature">
                 <a class="dump-class-member-name" href={ format!("#{}", qualified_name)}>
                     { &callback.name }
@@ -314,4 +320,13 @@ fn render_arguments(parameters: &Vec<DumpFunctionParameter>) -> Fragment {
                 }
             </div>
         )))
+}
+
+fn member_element_class(tags: &BTreeSet<String>, main_class: &str) -> String {
+    let mut element_class = "dump-class-member ".to_owned();
+    element_class.push_str(main_class);
+    if tags.contains("Deprecated") {
+        element_class.push_str(" dump-member-deprecated");
+    }
+    return element_class;
 }
