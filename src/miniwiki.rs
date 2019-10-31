@@ -60,8 +60,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
         .unwrap_or(DEFAULT_DESCRIPTION);
 
     let mut element_class = "dump-class".to_owned();
-    if class.tags.contains("Deprecated")
-    {
+    if class.tags.contains("Deprecated") {
         element_class.push_str(" dump-class-deprecated");
     }
 
@@ -296,8 +295,7 @@ fn render_arguments(parameters: &Vec<DumpFunctionParameter>) -> Fragment {
 fn member_element_class(tags: &BTreeSet<String>, main_class: &str) -> String {
     let mut element_class = "dump-class-member ".to_owned();
     element_class.push_str(main_class);
-    if tags.contains("Deprecated")
-    {
+    if tags.contains("Deprecated") {
         element_class.push_str(" dump-member-deprecated");
     }
     return element_class;
