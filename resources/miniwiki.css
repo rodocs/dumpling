@@ -195,9 +195,10 @@ a, a:visited {
 }
 
 .markdown p {
-	margin-bottom: 0.5em
+	margin-bottom: 0.5em;
 }
 
 .markdown ul {
-	padding-left: 2em
+	padding-left: 2em;
+	margin-bottom: 0.5em;
 }
