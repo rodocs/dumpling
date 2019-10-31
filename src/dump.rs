@@ -1,15 +1,7 @@
-use std::{
-    collections::HashMap,
-    collections::BTreeSet,
-    fmt,
-    fs,
-    io,
-    path::Path,
-    process::Command,
-};
+use std::{collections::BTreeSet, collections::HashMap, fmt, fs, io, path::Path, process::Command};
 
-use serde_derive::{Serialize, Deserialize};
 use roblox_install::RobloxStudio;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub enum DumpReadError {
@@ -193,36 +185,28 @@ impl DumpClassMember {
             DumpClassMember::Property(inner) => {
                 inner.description = Some(description);
                 inner.description_source = Some(source);
-            },
+            }
             DumpClassMember::Function(inner) => {
                 inner.description = Some(description);
                 inner.description_source = Some(source);
-            },
+            }
             DumpClassMember::Event(inner) => {
                 inner.description = Some(description);
                 inner.description_source = Some(source);
-            },
+            }
             DumpClassMember::Callback(inner) => {
                 inner.description = Some(description);
                 inner.description_source = Some(source);
-            },
+            }
         }
     }
 
     pub fn add_tag(&mut self, tag: &str) {
         let mut tags = match self {
-            DumpClassMember::Property(inner) => {
-                &mut inner.tags
-            },
-            DumpClassMember::Function(inner) => {
-                &mut inner.tags
-            },
-            DumpClassMember::Event(inner) => {
-                &mut inner.tags
-            },
-            DumpClassMember::Callback(inner) => {
-                &mut inner.tags
-            },
+            DumpClassMember::Property(inner) => &mut inner.tags,
+            DumpClassMember::Function(inner) => &mut inner.tags,
+            DumpClassMember::Event(inner) => &mut inner.tags,
+            DumpClassMember::Callback(inner) => &mut inner.tags,
         };
         tags.insert(tag.to_owned());
     }

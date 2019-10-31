@@ -10,12 +10,8 @@ use std::{
 };
 
 use quick_xml::{
+    events::{attributes::Attributes, BytesStart, Event},
     Reader,
-    events::{
-        BytesStart,
-        Event,
-        attributes::Attributes,
-    },
 };
 
 use lazy_static::lazy_static;
@@ -29,15 +25,22 @@ impl XmlQuery {
     pub fn new(query: &[(&'static str, &[(&'static str, &'static str)])]) -> XmlQuery {
         let pieces = query
             .iter()
-            .map(|(tag_name, input_attributes)| (*tag_name, input_attributes.iter().cloned().collect::<Vec<_>>()))
+            .map(|(tag_name, input_attributes)| {
+                (
+                    *tag_name,
+                    input_attributes.iter().cloned().collect::<Vec<_>>(),
+                )
+            })
             .collect::<Vec<_>>();
 
-        XmlQuery {
-            pieces,
-        }
+        XmlQuery { pieces }
     }
 
-    pub fn matches<B: BufRead>(&self, reader: &Reader<B>, element_stack: &[BytesStart<'static>]) -> bool {
+    pub fn matches<B: BufRead>(
+        &self,
+        reader: &Reader<B>,
+        element_stack: &[BytesStart<'static>],
+    ) -> bool {
         if element_stack.len() != self.pieces.len() {
             return false;
         }
@@ -60,7 +63,7 @@ impl XmlQuery {
                             if value != expected_value {
                                 return false;
                             }
-                        },
+                        }
                         None => return false,
                     }
                 }
@@ -71,7 +74,10 @@ impl XmlQuery {
     }
 }
 
-fn extract_attributes<B: BufRead>(reader: &Reader<B>, attributes: Attributes) -> HashMap<String, String> {
+fn extract_attributes<B: BufRead>(
+    reader: &Reader<B>,
+    attributes: Attributes,
+) -> HashMap<String, String> {
     let mut output = HashMap::new();
 
     for attribute in attributes {
@@ -112,7 +118,11 @@ impl ReflectionMetadata {
     pub fn read(path: Option<&Path>) -> Result<ReflectionMetadata, ReflectionMetadataReadError> {
         let path = match path {
             Some(p) => Cow::Borrowed(p),
-            None => Cow::Owned(RobloxStudio::locate()?.root_path().join("ReflectionMetadata.xml")),
+            None => Cow::Owned(
+                RobloxStudio::locate()?
+                    .root_path()
+                    .join("ReflectionMetadata.xml"),
+            ),
         };
 
         Ok(ReflectionMetadata::read_from_file(path.as_ref())?)
@@ -143,24 +153,23 @@ impl ReflectionMetadata {
                     element_stack.push(element.into_owned());
 
                     if CLASS_QUERY.matches(&reader, &element_stack) {
-                        let class = ReflectionMetadataClass::decode(&mut reader, &mut element_stack);
+                        let class =
+                            ReflectionMetadataClass::decode(&mut reader, &mut element_stack);
                         classes.insert(class.name.clone(), class);
                     }
-                },
+                }
                 Ok(Event::End(_)) => {
                     element_stack.pop();
-                },
+                }
                 Ok(Event::Eof) => break,
                 Err(_) => panic!("Error parsing XML!"),
-                _ => {},
+                _ => {}
             }
 
             xml_buffer.clear();
         }
 
-        Ok(ReflectionMetadata {
-            classes,
-        })
+        Ok(ReflectionMetadata { classes })
     }
 }
 
@@ -172,7 +181,10 @@ pub struct ReflectionMetadataClass {
 }
 
 impl ReflectionMetadataClass {
-    fn decode<B: BufRead>(reader: &mut Reader<B>, element_stack: &mut Vec<BytesStart<'static>>) -> ReflectionMetadataClass {
+    fn decode<B: BufRead>(
+        reader: &mut Reader<B>,
+        element_stack: &mut Vec<BytesStart<'static>>,
+    ) -> ReflectionMetadataClass {
         let mut name = String::new();
         let mut summary = String::new();
         let mut members = HashMap::new();
@@ -207,14 +219,14 @@ impl ReflectionMetadataClass {
 
                         members.insert(member.name.clone(), member);
                     }
-                },
+                }
                 Ok(Event::End(_)) => {
                     element_stack.pop();
 
                     if element_stack.len() < start_stack_len {
                         break;
                     }
-                },
+                }
                 Ok(Event::Text(text)) => {
                     let relevant_stack = &element_stack[start_stack_len..];
 
@@ -223,10 +235,10 @@ impl ReflectionMetadataClass {
                     } else if SUMMARY_QUERY.matches(&reader, relevant_stack) {
                         summary = text.unescape_and_decode(reader).unwrap();
                     }
-                },
+                }
                 Ok(Event::Eof) => break,
                 Err(_) => panic!("Error parsing ReflectionMetadataClass!"),
-                _ => {},
+                _ => {}
             }
 
             xml_buffer.clear();
@@ -247,7 +259,10 @@ pub struct ReflectionMetadataMember {
 }
 
 impl ReflectionMetadataMember {
-    fn decode<B: BufRead>(reader: &mut Reader<B>, element_stack: &mut Vec<BytesStart<'static>>) -> ReflectionMetadataMember {
+    fn decode<B: BufRead>(
+        reader: &mut Reader<B>,
+        element_stack: &mut Vec<BytesStart<'static>>,
+    ) -> ReflectionMetadataMember {
         let mut name = String::new();
         let mut summary = String::new();
 
@@ -255,54 +270,47 @@ impl ReflectionMetadataMember {
         let mut xml_buffer = Vec::new();
 
         lazy_static! {
-            static ref NAME_QUERY: XmlQuery = XmlQuery::new(&[
-                ("Properties", &[]),
-                ("string", &[("name", "Name")]),
-            ]);
-
-            static ref SUMMARY_QUERY: XmlQuery = XmlQuery::new(&[
-                ("Properties", &[]),
-                ("string", &[("name", "summary")]),
-            ]);
+            static ref NAME_QUERY: XmlQuery =
+                XmlQuery::new(&[("Properties", &[]), ("string", &[("name", "Name")]),]);
+            static ref SUMMARY_QUERY: XmlQuery =
+                XmlQuery::new(&[("Properties", &[]), ("string", &[("name", "summary")]),]);
         }
 
         loop {
             match reader.read_event(&mut xml_buffer) {
                 Ok(Event::Start(element)) => {
                     element_stack.push(element.into_owned());
-                },
+                }
                 Ok(Event::End(_)) => {
                     element_stack.pop();
 
                     if element_stack.len() < start_stack_len {
                         break;
                     }
-                },
+                }
                 Ok(Event::Text(text)) => {
                     let relevant_stack = &element_stack[start_stack_len..];
 
                     if NAME_QUERY.matches(&reader, relevant_stack) {
                         name = text.unescape_and_decode(reader).unwrap();
                     } else if SUMMARY_QUERY.matches(&reader, relevant_stack) {
-                        summary = text.unescape_and_decode(reader)
+                        summary = text
+                            .unescape_and_decode(reader)
                             .unwrap()
                             .lines()
                             .map(str::trim_start)
                             .collect::<Vec<_>>()
                             .join("\n\n");
                     }
-                },
+                }
                 Ok(Event::Eof) => break,
                 Err(_) => panic!("Error parsing ReflectionMetadataClass!"),
-                _ => {},
+                _ => {}
             }
 
             xml_buffer.clear();
         }
 
-        ReflectionMetadataMember {
-            name,
-            summary,
-        }
+        ReflectionMetadataMember { name, summary }
     }
 }
