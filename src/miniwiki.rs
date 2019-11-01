@@ -8,7 +8,7 @@ use ritz::{html, Fragment, HtmlContent, UnescapedText};
 
 use crate::dump::{
     ContentSource, Dump, DumpClass, DumpClassCallback, DumpClassEvent, DumpClassFunction,
-    DumpClassProperty, DumpFunctionParameter, DumpReturnType,
+    DumpClassProperty, DumpFunctionParameter, DumpIndex, DumpReturnType,
 };
 
 static STYLE: &str = include_str!(concat!(
@@ -18,8 +18,43 @@ static STYLE: &str = include_str!(concat!(
 
 static DEFAULT_DESCRIPTION: &str = "*No description available.*";
 
-fn render_markdown(input: &str) -> HtmlContent {
-    let parser = pulldown_cmark::Parser::new(input);
+fn render_markdown(input: &str, dump_index: &DumpIndex) -> HtmlContent<'static> {
+    let callback = |_norm: &str, raw: &str| {
+        let mut split = raw.split('.');
+        let class_name = split.next().unwrap();
+        if class_name == "Enum" {
+            // TODO: Validate enums and enum members
+            if let Some(enum_name) = split.next() {
+                Some((enum_name.to_owned(), enum_name.to_owned()))
+            } else {
+                None
+            }
+        } else if let Some(class_index) = dump_index.classes.get(class_name) {
+            if let Some(member_name) = split.next() {
+                if class_index.members.contains_key(member_name) {
+                    // Known class member
+                    let class_member_link = format!("#{}.{}", class_name, member_name);
+                    Some((class_member_link.clone(), class_member_link))
+                } else {
+                    // Unknown class member
+                    None
+                }
+            } else {
+                let class_link = format!("#{}", class_name);
+                Some((class_link.clone(), class_link))
+            }
+        } else {
+            // TODO: Validate Primitive or DataType
+            let raw_link = format!("#{}", raw);
+            Some((raw_link.clone(), raw_link))
+        }
+    };
+    let parser = pulldown_cmark::Parser::new_with_broken_link_callback(
+        input,
+        pulldown_cmark::Options::empty(),
+        Some(&callback),
+    );
+
     let mut output = String::new();
     pulldown_cmark::html::push_html(&mut output, parser);
 
@@ -29,6 +64,7 @@ fn render_markdown(input: &str) -> HtmlContent {
 pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
     writeln!(output, "<!doctype html>")?;
 
+    let dump_index = DumpIndex::new_from_dump(dump);
     let html = html!(
         <html>
             <head>
@@ -39,7 +75,7 @@ pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
             </head>
             <body>
                 <div class="dump-classes">
-                    { Fragment::new(dump.classes.iter().map(render_class)) }
+                    { Fragment::new(dump.classes.iter().map(|class| render_class(class, &dump_index))) }
                 </div>
             </body>
         </html>
@@ -48,7 +84,7 @@ pub fn emit_wiki(dump: &Dump, output: &mut String) -> fmt::Result {
     write!(output, "{}", html)
 }
 
-fn render_class(class: &DumpClass) -> HtmlContent {
+fn render_class<'a>(class: &'a DumpClass, dump_index: &DumpIndex) -> HtmlContent<'a> {
     let description = class
         .description
         .as_ref()
@@ -86,7 +122,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
 
             <div class="dump-class-description">
                 <div class="dump-class-description-text markdown">
-                    { render_markdown(description) }
+                    { render_markdown(description, &dump_index) }
                 </div>
                 <div class="dump-class-description-meta">
                     { class.description_source.map(|source| html!(
@@ -100,7 +136,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Properties"</div>
                         <div class="dump-class-member-section-list">
-                            { Fragment::new(class.properties().map(|property| render_property(property, &class.name))) }
+                            { Fragment::new(class.properties().map(|property| render_property(property, &class.name, dump_index))) }
                         </div>
                     </div>
                 )
@@ -113,7 +149,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Functions"</div>
                         <div class="dump-class-member-section-list">
-                            { Fragment::new(class.functions().map(|function| render_function(function, &class.name))) }
+                            { Fragment::new(class.functions().map(|function| render_function(function, &class.name, dump_index))) }
                         </div>
                     </div>
                 )
@@ -126,7 +162,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Events"</div>
                         <div class="dump-class-member-section-list">
-                            { Fragment::new(class.events().map(|event| render_event(event, &class.name))) }
+                            { Fragment::new(class.events().map(|event| render_event(event, &class.name, dump_index))) }
                         </div>
                     </div>
                 )
@@ -139,7 +175,7 @@ fn render_class(class: &DumpClass) -> HtmlContent {
                     <div class="dump-class-member-section">
                         <div class="dump-class-subtitle">"Callbacks"</div>
                         <div class="dump-class-member-section-list">
-                            { Fragment::new(class.callbacks().map(|callback| render_callback(callback, &class.name))) }
+                            { Fragment::new(class.callbacks().map(|callback| render_callback(callback, &class.name, dump_index))) }
                         </div>
                     </div>
                 )
@@ -150,7 +186,11 @@ fn render_class(class: &DumpClass) -> HtmlContent {
     )
 }
 
-fn render_property<'a>(property: &'a DumpClassProperty, parent_name: &str) -> HtmlContent<'a> {
+fn render_property<'a>(
+    property: &'a DumpClassProperty,
+    parent_name: &str,
+    dump_index: &DumpIndex,
+) -> HtmlContent<'a> {
     let description = property
         .description
         .as_ref()
@@ -168,12 +208,16 @@ fn render_property<'a>(property: &'a DumpClassProperty, parent_name: &str) -> Ht
                 ": "
                 { render_type_link(&property.value_type.name) }
             </div>
-            { render_member_description(description, property.description_source) }
+            { render_member_description(description, property.description_source, dump_index) }
         </div>
     )
 }
 
-fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> HtmlContent<'a> {
+fn render_function<'a>(
+    function: &'a DumpClassFunction,
+    parent_name: &str,
+    dump_index: &DumpIndex,
+) -> HtmlContent<'a> {
     let description = function
         .description
         .as_ref()
@@ -193,12 +237,16 @@ fn render_function<'a>(function: &'a DumpClassFunction, parent_name: &str) -> Ht
                 ") => "
                 { render_return_type(&function.return_type) }
             </div>
-            { render_member_description(description, function.description_source) }
+            { render_member_description(description, function.description_source, dump_index) }
         </div>
     )
 }
 
-fn render_event<'a>(event: &'a DumpClassEvent, parent_name: &str) -> HtmlContent<'a> {
+fn render_event<'a>(
+    event: &'a DumpClassEvent,
+    parent_name: &str,
+    dump_index: &DumpIndex,
+) -> HtmlContent<'a> {
     let description = event
         .description
         .as_ref()
@@ -219,12 +267,16 @@ fn render_event<'a>(event: &'a DumpClassEvent, parent_name: &str) -> HtmlContent
                 { render_arguments(&event.parameters) }
                 ")"
             </div>
-            { render_member_description(description, event.description_source) }
+            { render_member_description(description, event.description_source, dump_index) }
         </div>
     )
 }
 
-fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> HtmlContent<'a> {
+fn render_callback<'a>(
+    callback: &'a DumpClassCallback,
+    parent_name: &str,
+    dump_index: &DumpIndex,
+) -> HtmlContent<'a> {
     let description = callback
         .description
         .as_ref()
@@ -244,16 +296,20 @@ fn render_callback<'a>(callback: &'a DumpClassCallback, parent_name: &str) -> Ht
                 ") => "
                 { render_return_type(&callback.return_type) }
             </div>
-            { render_member_description(description, callback.description_source) }
+            { render_member_description(description, callback.description_source, dump_index) }
         </div>
     )
 }
 
-fn render_member_description(description: &str, source: Option<ContentSource>) -> HtmlContent {
+fn render_member_description<'a>(
+    description: &'a str,
+    source: Option<ContentSource>,
+    dump_index: &DumpIndex,
+) -> HtmlContent<'a> {
     html!(
         <div class="dump-class-member-description">
             <div class="dump-class-member-description-text markdown">
-                { render_markdown(description) }
+                { render_markdown(description, dump_index) }
             </div>
             <div class="dump-class-member-meta">
                 { Fragment::new(source.map(|source| html!(

@@ -1,4 +1,9 @@
-use std::{collections::BTreeSet, collections::HashMap, fmt, fs, io, path::Path, process::Command};
+use std::{
+    collections::{BTreeSet, HashMap},
+    fmt, fs, io,
+    path::Path,
+    process::Command,
+};
 
 use roblox_install::RobloxStudio;
 use serde_derive::{Deserialize, Serialize};
@@ -335,4 +340,39 @@ pub struct DumpEnumItem {
 pub enum DumpReturnType {
     Single(DumpType),
     Multiple(Vec<DumpType>),
+}
+
+pub struct DumpIndexClass {
+    pub class_index: usize,
+    pub members: HashMap<String, usize>,
+}
+
+pub struct DumpIndex {
+    pub classes: HashMap<String, DumpIndexClass>,
+}
+
+impl DumpIndex {
+    pub fn new_from_dump(dump: &Dump) -> DumpIndex {
+        DumpIndex {
+            classes: dump
+                .classes
+                .iter()
+                .enumerate()
+                .map(|(index, class)| {
+                    (
+                        class.name.to_owned(),
+                        DumpIndexClass {
+                            class_index: index,
+                            members: class
+                                .members
+                                .iter()
+                                .enumerate()
+                                .map(|(i, m)| (m.get_name().to_owned(), i))
+                                .collect(),
+                        },
+                    )
+                })
+                .collect(),
+        }
+    }
 }
