@@ -188,10 +188,18 @@ a, a:visited {
 
 .markdown code {
 	font-family: monospace;
+}
+
+.markdown :not(pre) code, .markdown pre {
 	background-color: rgba(0, 0, 0, 0.07);
 	padding: 0.05em 0.25em;
 	border: 1px solid rgba(0, 0, 0, 0.10);
 	border-radius: 0.25em;
+}
+
+.markdown pre {
+	padding-left: 0.5em;
+	margin-bottom: 0.5em;
 }
 
 .markdown p {
