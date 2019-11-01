@@ -8,7 +8,7 @@ use ritz::{html, Fragment, HtmlContent, UnescapedText};
 
 use crate::dump::{
     ContentSource, Dump, DumpClass, DumpClassCallback, DumpClassEvent, DumpClassFunction,
-    DumpClassProperty, DumpFunctionParameter, DumpIndex, DumpReturnType,
+    DumpClassProperty, DumpFunctionParameter, DumpIndex, DumpReference, DumpReturnType, DumpType,
 };
 
 static STYLE: &str = include_str!(concat!(
@@ -19,34 +19,14 @@ static STYLE: &str = include_str!(concat!(
 static DEFAULT_DESCRIPTION: &str = "*No description available.*";
 
 fn render_markdown(input: &str, dump_index: &DumpIndex) -> HtmlContent<'static> {
-    let callback = |_norm: &str, raw: &str| {
-        let mut split = raw.split('.');
-        let class_name = split.next().unwrap();
-        if class_name == "Enum" {
-            // TODO: Validate enums and enum members
-            if let Some(enum_name) = split.next() {
-                Some((enum_name.to_owned(), enum_name.to_owned()))
-            } else {
-                None
-            }
-        } else if let Some(class_index) = dump_index.classes.get(class_name) {
-            if let Some(member_name) = split.next() {
-                if class_index.members.contains_key(member_name) {
-                    // Known class member
-                    let class_member_link = format!("#{}.{}", class_name, member_name);
-                    Some((class_member_link.clone(), class_member_link))
-                } else {
-                    // Unknown class member
-                    None
-                }
-            } else {
-                let class_link = format!("#{}", class_name);
-                Some((class_link.clone(), class_link))
-            }
-        } else {
-            // TODO: Validate Primitive or DataType
-            let raw_link = format!("#{}", raw);
-            Some((raw_link.clone(), raw_link))
+    let callback = |_norm: &str, raw: &str| match dump_index.resolve_reference(raw)? {
+        DumpReference::Type(dump_type) => {
+            let type_link = format!("#{}", dump_type.get_name());
+            Some((type_link.clone(), type_link))
+        }
+        DumpReference::Member(dump_type, member_name) => {
+            let type_link = format!("#{}.{}", dump_type.get_name(), member_name);
+            Some((type_link.clone(), type_link))
         }
     };
     let parser = pulldown_cmark::Parser::new_with_broken_link_callback(
@@ -105,7 +85,7 @@ fn render_class<'a>(class: &'a DumpClass, dump_index: &DumpIndex) -> HtmlContent
             { class.superclass.as_ref().map(|superclass| html!(
                 <p class="dump-class-inherits">
                     "Inherits: "
-                    { render_type_link(&superclass) }
+                    { render_type_link(&DumpType::Class(superclass.to_string())) }
                 </p>
             )) }
 
@@ -206,7 +186,7 @@ fn render_property<'a>(
                     { &property.name }
                 </a>
                 ": "
-                { render_type_link(&property.value_type.name) }
+                { render_type_link(&property.value_type) }
             </div>
             { render_member_description(description, property.description_source, dump_index) }
         </div>
@@ -254,6 +234,7 @@ fn render_event<'a>(
         .unwrap_or(DEFAULT_DESCRIPTION);
 
     let qualified_name = format!("{}.{}", parent_name, event.name);
+    let signal_type = DumpType::DataType("RBXScriptSignal".to_string());
 
     html!(
         <div class={ member_element_class(&event.tags, "dump-class-event") } id={ qualified_name.clone() }>
@@ -262,7 +243,7 @@ fn render_event<'a>(
                     { &event.name }
                 </a>
                 ": "
-                { render_type_link("RBXScriptSignal") }
+                { render_type_link(&signal_type) }
                 "("
                 { render_arguments(&event.parameters) }
                 ")"
@@ -322,7 +303,7 @@ fn render_member_description<'a>(
 
 fn render_return_type(return_type: &DumpReturnType) -> HtmlContent {
     match return_type {
-        DumpReturnType::Single(t) => render_type_link(&t.name),
+        DumpReturnType::Single(t) => render_type_link(&t),
         DumpReturnType::Multiple(ts) => html!(
             <span>
             "("
@@ -332,7 +313,7 @@ fn render_return_type(return_type: &DumpReturnType) -> HtmlContent {
                 .enumerate()
                 .map(|(index, param)| html!(
                     <span class="dump-function-return-type">
-                        { render_type_link(&param.name) }
+                        { render_type_link(&param) }
                         {
                             if index < ts.len() - 1 {
                                 ", ".into()
@@ -349,10 +330,11 @@ fn render_return_type(return_type: &DumpReturnType) -> HtmlContent {
     }
 }
 
-fn render_type_link(name: &str) -> HtmlContent {
+fn render_type_link(t: &DumpType) -> HtmlContent<'static> {
+    let name = t.get_name();
     html!(
         <a href={ format!("#{}", name) }>
-            { name }
+            { name.to_string() }
         </a>
     )
 }
@@ -363,7 +345,7 @@ fn render_arguments(parameters: &[DumpFunctionParameter]) -> Fragment {
             <div class="dump-function-argument">
                 { &param.name }
                 ": "
-                { render_type_link(&param.kind.name) }
+                { render_type_link(&param.kind) }
                 {
                     if index < parameters.len() - 1 {
                         ",".into()

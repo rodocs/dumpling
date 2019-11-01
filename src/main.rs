@@ -13,7 +13,7 @@ use std::{fs, path::Path};
 use clap::{App, Arg, SubCommand};
 
 use crate::{
-    dump::{ContentSource, Dump, DumpClassMember, DumpReturnType, DumpType},
+    dump::{ContentSource, Dump, DumpClassMember, DumpIndex, DumpReference, DumpReturnType},
     dump_devhub::DevHubData,
     reflection_metadata::ReflectionMetadata,
     supplement::SupplementalData,
@@ -40,22 +40,8 @@ fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
     }
 }
 
-fn simple_name_to_dump_type(name: &str) -> DumpType {
-    let mut n: &str = name;
-    let c = String::from(if name.starts_with("Enum.") {
-        n = &name[5..];
-        "Enum"
-    } else {
-        // TODO: Primitive, Class, and DataType. Also generic Group types. Not sure what to do with unique tables.
-        "TODO"
-    });
-    DumpType {
-        name: String::from(n),
-        category: c,
-    }
-}
-
 fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
+    let dump_index = DumpIndex::new_from_dump(dump);
     for class in dump.classes.iter_mut() {
         if let Some(description) = content.item_descriptions.get(&class.name) {
             class.description = Some(description.prose.clone());
@@ -76,7 +62,15 @@ fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
                             function.return_type = DumpReturnType::Multiple(
                                 type_names
                                     .iter()
-                                    .map(|simple_name| simple_name_to_dump_type(&simple_name))
+                                    .map(|simple_name| {
+                                        match dump_index
+                                            .resolve_reference(simple_name)
+                                            .expect("Invalid type in supplemental return values")
+                                        {
+                                            DumpReference::Type(dump_type) => dump_type,
+                                            DumpReference::Member(dump_type, _) => dump_type,
+                                        }
+                                    })
                                     .collect(),
                             );
                         }

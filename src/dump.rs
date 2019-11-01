@@ -1,5 +1,5 @@
 use std::{
-    collections::{BTreeSet, HashMap},
+    collections::{BTreeSet, HashMap, HashSet},
     fmt, fs, io,
     path::Path,
     process::Command,
@@ -315,10 +315,25 @@ pub struct DumpFunctionParameter {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-pub struct DumpType {
-    pub name: String,
-    pub category: String,
+#[serde(rename_all = "PascalCase", tag = "Category", content = "Name")]
+pub enum DumpType {
+    Class(String),
+    DataType(String),
+    Enum(String),
+    Group(String),
+    Primitive(String),
+}
+
+impl DumpType {
+    pub fn get_name(&self) -> &str {
+        match self {
+            DumpType::Class(name) => name,
+            DumpType::DataType(name) => name,
+            DumpType::Enum(name) => name,
+            DumpType::Group(name) => name,
+            DumpType::Primitive(name) => name,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -348,7 +363,13 @@ pub struct DumpIndexClass {
 }
 
 pub struct DumpIndex {
-    pub classes: HashMap<String, DumpIndexClass>,
+    classes: HashMap<String, DumpIndexClass>,
+    primitives: HashSet<&'static str>,
+}
+
+pub enum DumpReference {
+    Type(DumpType),
+    Member(DumpType, String),
 }
 
 impl DumpIndex {
@@ -373,6 +394,69 @@ impl DumpIndex {
                     )
                 })
                 .collect(),
+            primitives: {
+                let mut primitives = HashSet::new();
+                primitives.insert("bool");
+                primitives.insert("double");
+                primitives.insert("float");
+                primitives.insert("int");
+                primitives.insert("int64");
+                primitives.insert("string");
+                primitives.insert("void");
+                primitives
+            },
+        }
+    }
+
+    pub fn resolve_reference(&self, reference: &str) -> Option<DumpReference> {
+        let mut split = reference.split('.');
+        let type_name = split.next().unwrap();
+        if type_name == "Enum" {
+            // TODO: Validate enums and enum members
+            if let Some(enum_name) = split.next() {
+                if let Some(member_name) = split.next() {
+                    Some(DumpReference::Member(
+                        DumpType::Enum(enum_name.to_string()),
+                        member_name.to_string(),
+                    ))
+                } else {
+                    Some(DumpReference::Type(DumpType::Enum(enum_name.to_string())))
+                }
+            } else {
+                None
+            }
+        } else if self.primitives.contains(type_name) {
+            // Known primitive
+            Some(DumpReference::Type(DumpType::Primitive(
+                type_name.to_string(),
+            )))
+        } else if let Some(class_index) = self.classes.get(type_name) {
+            if let Some(member_name) = split.next() {
+                if class_index.members.contains_key(member_name) {
+                    // Known class member
+                    Some(DumpReference::Member(
+                        DumpType::Class(type_name.to_string()),
+                        member_name.to_string(),
+                    ))
+                } else {
+                    // Unknown class member
+                    None
+                }
+            } else {
+                Some(DumpReference::Type(DumpType::Class(type_name.to_string())))
+            }
+        } else {
+            // TODO: Validate DataType
+            if let Some(member_name) = split.next() {
+                Some(DumpReference::Member(
+                    DumpType::DataType(type_name.to_string()),
+                    member_name.to_string(),
+                ))
+            } else {
+                Some(DumpReference::Type(DumpType::DataType(
+                    type_name.to_string(),
+                )))
+            }
         }
     }
 }
