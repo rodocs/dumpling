@@ -321,7 +321,11 @@ fn render_return_type(
     return_type: &DumpType,
     returns: &[DumpFunctionReturn],
 ) -> HtmlContent<'static> {
-    if !returns.is_empty() {
+    if returns.is_empty() {
+        render_type_link(&return_type)
+    } else if returns.len() == 1 {
+        render_type_link(&returns[0].kind)
+    } else {
         html!(
             <span>
             "("
@@ -345,8 +349,6 @@ fn render_return_type(
             ")"
             </span>
         )
-    } else {
-        render_type_link(&return_type)
     }
 }
 
