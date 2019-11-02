@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 clap = "2.32"
 lazy_static = "1.0"
-pulldown-cmark = { version = "0.1.2", default-features = false }
+pulldown-cmark = { version = "0.6.0", default-features = false }
 quick-xml = "0.13.0"
 reqwest = "0.9.18"
 ritz = "0.1.0"

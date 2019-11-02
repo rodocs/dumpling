@@ -29,11 +29,12 @@ fn render_markdown(input: &str, dump_index: &DumpIndex) -> HtmlContent<'static> 
             Some((type_link.clone(), type_link))
         }
     };
-    let parser = pulldown_cmark::Parser::new_with_broken_link_callback(
-        input,
-        pulldown_cmark::Options::empty(),
-        Some(&callback),
-    );
+
+    let mut options = pulldown_cmark::Options::empty();
+    options.insert(pulldown_cmark::Options::ENABLE_TABLES);
+
+    let parser =
+        pulldown_cmark::Parser::new_with_broken_link_callback(input, options, Some(&callback));
 
     let mut output = String::new();
     pulldown_cmark::html::push_html(&mut output, parser);
