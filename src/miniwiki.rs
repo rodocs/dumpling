@@ -221,7 +221,7 @@ fn render_function<'a>(
             </div>
             { render_member_description(description, function.description_source, dump_index) }
             {
-                if !function.returns.is_empty() {
+                if function.parameters.iter().any(|x| x.description.is_some()) {
                     render_parameters_table(&function.parameters, &dump_index)
                 } else {
                     HtmlContent::None
