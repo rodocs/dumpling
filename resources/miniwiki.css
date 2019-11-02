@@ -172,18 +172,24 @@ a, a:visited {
 }
 
 .markdown h1 {
-	font-size: 2rem;
+	font-size: 1.5rem;
 	font-weight: bold;
+	margin-bottom: 0.5rem;
+	margin-top: 0.75rem;
 }
 
 .markdown h2 {
-	font-size: 1.6rem;
+	font-size: 1.2rem;
 	font-weight: bold;
+	margin-bottom: 0.5rem;
+	margin-top: 0.75rem;
 }
 
 .markdown h3 {
-	font-size: 1.3rem;
+	font-size: 1.1rem;
 	font-weight: bold;
+	margin-bottom: 0.5rem;
+	margin-top: 0.75rem;
 }
 
 .markdown strong {
