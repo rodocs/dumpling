@@ -52,8 +52,8 @@ a, a:visited {
 }
 
 .dump-class {
-	margin-top: 3em;
-	margin-bottom: 4em;
+	margin-top: 2em;
+	margin-bottom: 3em;
 }
 
 .dump-class-title {
@@ -70,6 +70,14 @@ a, a:visited {
 	font-weight: bold;
 	padding-left: 0.5rem;
 	position: relative;
+	margin-bottom: 0.5em;
+}
+
+.dump-class-member-subtitle {
+	font-size: 1.1rem;
+	font-weight: bold;
+	position: relative;
+	margin-top: 0.5em;
 	margin-bottom: 0.5em;
 }
 
@@ -100,7 +108,7 @@ a, a:visited {
 }
 
 .dump-class-member-section {
-	margin-top: 2rem;
+	margin-top: 0.5rem;
 }
 
 .dump-class-member {
@@ -133,7 +141,7 @@ a, a:visited {
 
 .dump-class-member-description {
 	display: flex;
-	padding-top: .5rem;
+	margin-top: .75rem;
 	overflow: visible;
 }
 
@@ -199,14 +207,34 @@ a, a:visited {
 
 .markdown pre {
 	padding-left: 0.5em;
-	margin-bottom: 0.5em;
 }
 
-.markdown p {
-	margin-bottom: 0.5em;
+.markdown p, .markdown pre, .markdown ul, .markdown table {
+	margin-bottom: 0.75em;
 }
 
 .markdown ul {
 	padding-left: 2em;
-	margin-bottom: 0.5em;
+}
+
+table td, table th {
+    padding: 6px 13px;
+    border: 1px solid #dfe2e5;
+}
+
+table {
+    border-spacing: 0;
+	border-collapse: collapse;
+	min-width: 100%;
+	margin-bottom: 0.75em;
+}
+
+table th {
+    padding: 6px 13px;
+	border: 1px solid #dfe2e5;
+	text-align: left;
+}
+
+table td {
+	vertical-align: text-top;
 }

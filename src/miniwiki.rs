@@ -8,7 +8,8 @@ use ritz::{html, Fragment, HtmlContent, UnescapedText};
 
 use crate::dump::{
     ContentSource, Dump, DumpClass, DumpClassCallback, DumpClassEvent, DumpClassFunction,
-    DumpClassProperty, DumpFunctionParameter, DumpIndex, DumpReference, DumpReturnType, DumpType,
+    DumpClassProperty, DumpFunctionParameter, DumpFunctionReturn, DumpIndex, DumpReference,
+    DumpType,
 };
 
 static STYLE: &str = include_str!(concat!(
@@ -216,9 +217,23 @@ fn render_function<'a>(
                 "("
                 { render_arguments(&function.parameters) }
                 ") => "
-                { render_return_type(&function.return_type) }
+                { render_return_type(&function.return_type, &function.returns) }
             </div>
             { render_member_description(description, function.description_source, dump_index) }
+            {
+                if !function.returns.is_empty() {
+                    render_parameters_table(&function.parameters, &dump_index)
+                } else {
+                    HtmlContent::None
+                }
+            }
+            {
+                if !function.returns.is_empty() {
+                    render_returns_table(&function.returns, &dump_index)
+                } else {
+                    HtmlContent::None
+                }
+            }
         </div>
     )
 }
@@ -276,7 +291,7 @@ fn render_callback<'a>(
                 ": function("
                 { render_arguments(&callback.parameters) }
                 ") => "
-                { render_return_type(&callback.return_type) }
+                { render_return_type(&callback.return_type, &callback.returns) }
             </div>
             { render_member_description(description, callback.description_source, dump_index) }
         </div>
@@ -302,21 +317,23 @@ fn render_member_description<'a>(
     )
 }
 
-fn render_return_type(return_type: &DumpReturnType) -> HtmlContent {
-    match return_type {
-        DumpReturnType::Single(t) => render_type_link(&t),
-        DumpReturnType::Multiple(ts) => html!(
+fn render_return_type(
+    return_type: &DumpType,
+    returns: &[DumpFunctionReturn],
+) -> HtmlContent<'static> {
+    if !returns.is_empty() {
+        html!(
             <span>
             "("
             {
-                Fragment::new(ts
+                Fragment::new(returns
                 .iter()
                 .enumerate()
                 .map(|(index, param)| html!(
                     <span class="dump-function-return-type">
-                        { render_type_link(&param) }
+                        { render_type_link(&param.kind) }
                         {
-                            if index < ts.len() - 1 {
+                            if index < returns.len() - 1 {
                                 ", ".into()
                             } else {
                                 HtmlContent::None
@@ -327,7 +344,9 @@ fn render_return_type(return_type: &DumpReturnType) -> HtmlContent {
             }
             ")"
             </span>
-        ),
+        )
+    } else {
+        render_type_link(&return_type)
     }
 }
 
@@ -357,6 +376,113 @@ fn render_arguments(parameters: &[DumpFunctionParameter]) -> Fragment {
             </div>
         )
     }))
+}
+
+fn render_parameters_table<'a>(
+    parameters: &'a [DumpFunctionParameter],
+    dump_index: &DumpIndex,
+) -> HtmlContent<'a> {
+    let has_defaults = parameters.iter().any(|p| p.default.is_some());
+    html!(
+        <div class="dump-function-returns">
+            <div class="dump-class-member-subtitle">"Parameters"</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>"Name"</th>
+                        <th>"Type"</th>
+                        {
+                            if has_defaults {
+                                html!(<th>"Default"</th>)
+                            } else {
+                                HtmlContent::None
+                            }
+                        }
+                        <th>"Description"</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        Fragment::new(parameters
+                            .iter()
+                            .enumerate()
+                            .map(|(index, val)| html!(
+                                <tr>
+                                <td>{ &val.name }</td>
+                                <td>{ render_type_link(&val.kind) }</td>
+                                {
+                                    if has_defaults {
+                                        html!(
+                                            <td>
+                                            {
+                                                if let Some(default) = &val.default {
+                                                    html!({ default })
+                                                } else {
+                                                    HtmlContent::None
+                                                }
+                                            }
+                                            </td>
+                                        )
+                                    } else {
+                                        HtmlContent::None
+                                    }
+                                }
+                                <td>
+                                {
+                                    if let Some(description) = &val.description {
+                                        render_markdown(&description, dump_index)
+                                    } else {
+                                        HtmlContent::None
+                                    }
+                                }
+                                </td>
+                                </tr>
+                            )))
+                    }
+                </tbody>
+            </table>
+        </div>
+    )
+}
+
+fn render_returns_table<'a>(
+    returns: &'a [DumpFunctionReturn],
+    dump_index: &DumpIndex,
+) -> HtmlContent<'a> {
+    html!(
+        <div class="dump-function-returns">
+            <div class="dump-class-member-subtitle">"Returns"</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>"Type"</th>
+                        <th>"Description"</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        Fragment::new(returns
+                            .iter()
+                            .enumerate()
+                            .map(|(index, val)| html!(
+                                <tr>
+                                <td>{ render_type_link(&val.kind) }</td>
+                                <td>
+                                {
+                                    if let Some(description) = &val.description {
+                                        render_markdown(&description, dump_index)
+                                    } else {
+                                        HtmlContent::None
+                                    }
+                                }
+                                </td>
+                                </tr>
+                            )))
+                    }
+                </tbody>
+            </table>
+        </div>
+    )
 }
 
 fn member_element_class(tags: &BTreeSet<String>, main_class: &str) -> String {

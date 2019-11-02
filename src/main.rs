@@ -13,7 +13,7 @@ use std::{fs, path::Path};
 use clap::{App, Arg, SubCommand};
 
 use crate::{
-    dump::{ContentSource, Dump, DumpClassMember, DumpIndex, DumpReference, DumpReturnType},
+    dump::{ContentSource, Dump, DumpClassMember, DumpFunctionReturn, DumpIndex, DumpReference},
     dump_devhub::DevHubData,
     reflection_metadata::ReflectionMetadata,
     supplement::SupplementalData,
@@ -58,21 +58,37 @@ fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
                         function.description = Some(description.prose.clone());
                         function.description_source = Some(ContentSource::Supplemental);
 
-                        if let Some(type_names) = &description.metadata.return_types {
-                            function.return_type = DumpReturnType::Multiple(
-                                type_names
-                                    .iter()
-                                    .map(|simple_name| {
-                                        match dump_index
-                                            .resolve_reference(simple_name)
-                                            .expect("Invalid type in supplemental return values")
-                                        {
-                                            DumpReference::Type(dump_type) => dump_type,
-                                            DumpReference::Member(dump_type, _) => dump_type,
-                                        }
-                                    })
-                                    .collect(),
-                            );
+                        if !description.metadata.returns.is_empty() {
+                            function.returns = description
+                                .metadata
+                                .returns
+                                .iter()
+                                .map(|ret| DumpFunctionReturn {
+                                    kind: match dump_index
+                                        .resolve_reference(&ret.kind)
+                                        .expect("Invalid type in supplemental return values")
+                                    {
+                                        DumpReference::Type(dump_type) => dump_type,
+                                        DumpReference::Member(dump_type, _) => dump_type,
+                                    },
+                                    description: Some(ret.description.to_string()),
+                                    description_source: Some(ContentSource::Supplemental),
+                                })
+                                .collect();
+                        }
+                        if !description.metadata.parameters.is_empty() {
+                            description
+                                .metadata
+                                .parameters
+                                .iter()
+                                .zip(function.parameters.iter_mut())
+                                .for_each(|(meta, param)| {
+                                    param.description = Some(meta.description.to_string());
+                                    param.description_source = Some(ContentSource::Supplemental);
+                                    if let Some(default) = &meta.default {
+                                        param.default = Some(default.to_string());
+                                    }
+                                });
                         }
                     }
                 }

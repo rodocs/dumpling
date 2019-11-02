@@ -248,7 +248,10 @@ pub struct DumpClassFunction {
 
     pub parameters: Vec<DumpFunctionParameter>,
 
-    pub return_type: DumpReturnType,
+    #[serde(default)]
+    pub returns: Vec<DumpFunctionReturn>,
+
+    pub return_type: DumpType,
 
     pub security: String,
 
@@ -286,9 +289,12 @@ pub struct DumpClassCallback {
     #[serde(default)]
     pub tags: BTreeSet<String>,
 
+    #[serde(default)]
+    pub returns: Vec<DumpFunctionReturn>,
+
     pub parameters: Vec<DumpFunctionParameter>,
 
-    pub return_type: DumpReturnType,
+    pub return_type: DumpType,
 
     pub security: String,
 
@@ -304,6 +310,21 @@ pub struct DumpClassCallback {
 pub struct DumpFunctionParameter {
     pub name: String,
 
+    #[serde(rename = "Type")]
+    pub kind: DumpType,
+
+    pub default: Option<String>,
+
+    /// Added by Dumpling
+    pub description: Option<String>,
+
+    /// Added by Dumpling
+    pub description_source: Option<ContentSource>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct DumpFunctionReturn {
     #[serde(rename = "Type")]
     pub kind: DumpType,
 
@@ -348,13 +369,6 @@ pub struct DumpEnum {
 pub struct DumpEnumItem {
     pub name: String,
     pub value: u32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum DumpReturnType {
-    Single(DumpType),
-    Multiple(Vec<DumpType>),
 }
 
 pub struct DumpIndexClass {
