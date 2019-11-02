@@ -1,0 +1,6 @@
++++
+Target = "BodyPosition.ReachedTarget"
+Type = RBXScriptSignal<() => void, false>
++++
+
+Fired when the Parent of the BodyPosition reaches the desired [BodyPosition.Position](https://developer.roblox.com/api-reference/property/BodyPosition/Position) (within .1 studs). Once this event fires it will not fire again until [BodyPosition.Position](https://developer.roblox.com/api-reference/property/BodyPosition/Position) is updated.

@@ -1,0 +1,5 @@
++++
+Target = "PartOperationAsset"
++++
+
+An internal instance used to save/load [solid models](https://developer.roblox.com/articles/3D-Modeling-with-Parts) onto the Roblox cloud.

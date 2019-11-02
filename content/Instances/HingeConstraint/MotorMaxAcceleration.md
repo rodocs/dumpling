@@ -1,0 +1,6 @@
++++
+Target = "HingeConstraint.MotorMaxAcceleration"
+Type = number
++++
+
+The maximum angular acceleration a `HingeConstraint` with [HingeConstraint.ActuatorType](https://developer.roblox.com/api-reference/property/HingeConstraint/ActuatorType) set to [Motor](https://developer.roblox.com/search#stq=ActuatorType) can apply to achieve its [HingeConstraint.AngularVelocity](https://developer.roblox.com/api-reference/property/HingeConstraint/AngularVelocity). Measured in radians/(second squared).

@@ -1,0 +1,6 @@
++++
+Target = "ReflectionMetadataItem.summary"
+Type = string
++++
+
+This summary gives a description of the item, as given by the Roblox developers while working on it.

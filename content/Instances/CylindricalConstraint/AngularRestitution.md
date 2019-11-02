@@ -1,0 +1,6 @@
++++
+Target = "CylindricalConstraint.AngularRestitution"
+Type = number
++++
+
+Restitution of the two limits, or how elastic they are. Value in [0, 1].

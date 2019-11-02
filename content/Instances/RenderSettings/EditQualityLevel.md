@@ -1,0 +1,6 @@
++++
+Target = "RenderSettings.EditQualityLevel"
+Type = Enum.QualityLevel
++++
+
+Sets the graphics quality level in Roblox Studio, when [RenderSettings.EnableFRM](https://developer.roblox.com/api-reference/property/RenderSettings/EnableFRM) is set to false.

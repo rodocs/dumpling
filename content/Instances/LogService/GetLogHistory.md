@@ -1,0 +1,6 @@
++++
+Target = "LogService.GetLogHistory"
+Type = { (): LogInfo[]; (): LogInfo[]; }
++++
+
+Returns a table of tables, each of which corresponds to something which has been displayed in the output..

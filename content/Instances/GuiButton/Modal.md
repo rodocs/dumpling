@@ -1,0 +1,6 @@
++++
+Target = "GuiButton.Modal"
+Type = boolean
++++
+
+If true while the GUI element is visible, the mouse will not be locked unless the right mouse button is down.

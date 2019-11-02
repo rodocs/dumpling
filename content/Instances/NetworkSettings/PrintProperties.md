@@ -1,0 +1,6 @@
++++
+Target = "NetworkSettings.PrintProperties"
+Type = boolean
++++
+
+A diagnostics property that no longer appears to be in use. Would likely print information about property changes being streamed between the server and client.

@@ -1,0 +1,6 @@
++++
+Target = "ReflectionMetadataItem.UIMinimum"
+Type = number
++++
+
+The minimum value of this property. Used with [ReflectionMetadataItem.UIMaximum](https://developer.roblox.com/api-reference/property/ReflectionMetadataItem/UIMaximum) to control the slider bar of this property in the _Properties_ window.

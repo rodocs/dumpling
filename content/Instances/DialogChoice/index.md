@@ -1,0 +1,5 @@
++++
+Target = "DialogChoice"
++++
+
+Used to craft the further choices available to players who have started a dialog conversation with an NPC.

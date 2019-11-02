@@ -1,0 +1,6 @@
++++
+Target = "NetworkSettings.PrintEvents"
+Type = boolean
++++
+
+PrintEvents is a diagnostics property that no longer appears to be in use. It would have likely printed information about events being replicated across the server/client boundary.

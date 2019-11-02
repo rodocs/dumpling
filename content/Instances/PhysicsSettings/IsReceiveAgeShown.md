@@ -1,0 +1,6 @@
++++
+Target = "PhysicsSettings.IsReceiveAgeShown"
+Type = boolean
++++
+
+This property is supposed to show the [BasePart.ReceiveAge](https://developer.roblox.com/api-reference/property/BasePart/ReceiveAge) of a part, but it does not work correctly.

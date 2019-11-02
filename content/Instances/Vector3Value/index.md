@@ -1,0 +1,5 @@
++++
+Target = "Vector3Value"
++++
+
+A Vector3Value simply holds a Vector3 as a value. This value can be used for scripts to communicate, for objects to move to a preset location, etc.

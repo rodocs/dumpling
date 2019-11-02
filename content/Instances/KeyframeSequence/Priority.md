@@ -1,0 +1,6 @@
++++
+Target = "KeyframeSequence.Priority"
+Type = Enum.AnimationPriority
++++
+
+Determines the default priority of an animation created from the `KeyframeSequence`. Depending on what this is set to, playing multiple animations at once will look to this property to figure out which `Keyframe` `Poses` should be played over one another.When an `AnimationTrack` has been created from an `Animation`, its [AnimationTrack.Priority](https://developer.roblox.com/api-reference/property/AnimationTrack/Priority) property will default to the original `KeyframeSequence` value. Note this value can be overwritten.

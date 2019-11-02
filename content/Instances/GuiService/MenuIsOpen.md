@@ -1,0 +1,6 @@
++++
+Target = "GuiService.MenuIsOpen"
+Type = boolean
++++
+
+Status of the Roblox escape menu CoreGui. Returns true if the menu is open, false if not.

@@ -1,0 +1,6 @@
++++
+Target = "DebuggerManager.StepOver"
+Type = () => void
++++
+
+Performs a [step over](https://developer.roblox.com/articles/Lua-debugger) operation on the Lua Debugger.

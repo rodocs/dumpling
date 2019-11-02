@@ -1,0 +1,6 @@
++++
+Target = "ReflectionMetadataItem.UINumTicks"
+Type = number
++++
+
+The number of potential values the property's slider bar can be set to, between [UIMinimum](https://developer.roblox.com/api-reference/property/ReflectionMetadataItem/UIMinimum) and [UIMaximum](https://developer.roblox.com/api-reference/property/ReflectionMetadataItem/UIMaximum).

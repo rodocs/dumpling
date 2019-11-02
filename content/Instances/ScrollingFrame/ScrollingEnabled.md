@@ -1,0 +1,6 @@
++++
+Target = "ScrollingFrame.ScrollingEnabled"
+Type = boolean
++++
+
+Determines whether or not scrolling is allowed on the frame. If false, no scroll bars will be rendered.

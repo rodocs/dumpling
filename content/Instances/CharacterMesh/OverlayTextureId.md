@@ -1,0 +1,6 @@
++++
+Target = "CharacterMesh.OverlayTextureId"
+Type = number
++++
+
+The assetId of the overlay texture. The overlay covers Shirts, Pants, T-Shirts, and the [CharacterMesh.BaseTextureId](https://developer.roblox.com/api-reference/property/CharacterMesh/BaseTextureId).

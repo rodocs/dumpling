@@ -1,0 +1,5 @@
++++
+Target = "GuidRegistryService"
++++
+
+An internal service, whose functionality is not accessible to developers.

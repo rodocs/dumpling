@@ -1,0 +1,6 @@
++++
+Target = "HingeConstraint.MotorMaxTorque"
+Type = number
++++
+
+The maximum torque a `HingeConstraint` with [HingeConstraint.ActuatorType](https://developer.roblox.com/api-reference/property/HingeConstraint/ActuatorType) set to [Motor](https://developer.roblox.com/search#stq=ActuatorType) can apply when trying to reach its desired [HingeConstraint.AngularVelocity](https://developer.roblox.com/api-reference/property/HingeConstraint/AngularVelocity).

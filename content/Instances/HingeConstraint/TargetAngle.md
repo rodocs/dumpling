@@ -1,0 +1,6 @@
++++
+Target = "HingeConstraint.TargetAngle"
+Type = number
++++
+
+The target angle a `HingeConstraint` will attempt to rotate to if its [HingeConstraint.ActuatorType](https://developer.roblox.com/api-reference/property/HingeConstraint/ActuatorType) is set to [Servo](https://developer.roblox.com/search#stq=ActuatorType). Measured in degrees.

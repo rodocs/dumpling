@@ -1,0 +1,6 @@
++++
+Target = "Studio.["Show Navigation Mesh"]"
+Type = boolean
++++
+
+When set to true, the navigation mesh used by the `PathfindingService` will be visualized.

@@ -1,0 +1,5 @@
++++
+Target = "BrickColorValue"
++++
+
+An instance which is used to store a BrickColor value.

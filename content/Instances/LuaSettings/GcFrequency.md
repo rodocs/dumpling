@@ -1,0 +1,6 @@
++++
+Target = "LuaSettings.GcFrequency"
+Type = number
++++
+
+How many heartbeats there are between manual GC steps in Lua.

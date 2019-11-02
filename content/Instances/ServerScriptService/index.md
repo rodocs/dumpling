@@ -1,0 +1,6 @@
++++
+Target = "ServerScriptService"
+Tags = "Server"
++++
+
+A semantic, organized place to put your server-sided game logic, which does not interfere with the world. Scripts will run inside this service, and will not replicate to game clients, allowing for secure storage of your scripts.

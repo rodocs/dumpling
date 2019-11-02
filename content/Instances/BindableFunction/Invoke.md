@@ -1,0 +1,6 @@
++++
+Target = "BindableFunction.Invoke"
+Type = { (...arguments: unknown[]): unknown[]; (...arguments: unknown[]): unknown[]; }
++++
+
+Invoke will call the OnInvoke callback and return any values that were returned by the callback (if any). If the OnInvoke callback is not set, this method will yield until one is set. If OnInvoke yields, this method will also yield. There are limitations on the values that can be sent as arguments; see the code samples.

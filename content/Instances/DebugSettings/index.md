@@ -1,0 +1,5 @@
++++
+Target = "DebugSettings"
++++
+
+The DebugSettings allows you to view diagnostics information regarding Roblox. It is labeled as **Diagnostics** in the Roblox Studio Settings menu.

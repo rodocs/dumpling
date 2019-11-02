@@ -1,0 +1,5 @@
++++
+Target = "LuaSourceContainer"
++++
+
+The base class for all objects which contain Lua code. `Script`, `LocalScript`, `ModuleScript` and `CoreScript` all inherit from LuaSourceContainer.

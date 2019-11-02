@@ -1,0 +1,5 @@
++++
+Target = "LayerCollector"
++++
+
+LayerCollector is an abstract class inherited by 2D GUI Objects which render GuiObjects in layers.

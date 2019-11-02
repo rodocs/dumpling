@@ -1,0 +1,5 @@
++++
+Target = "JointsService"
++++
+
+The JointsService is a service that stores joints created by surface connections. It also has API available for visualizing surface to surface contact, and joining surfaces together.

@@ -1,0 +1,6 @@
++++
+Target = "SlidingBallConstraint.Velocity"
+Type = number
++++
+
+The velocity a `SlidingBallConstraint` with [SlidingBallConstraint.ActuatorType](https://developer.roblox.com/api-reference/property/SlidingBallConstraint/ActuatorType) set to [Enum.ActuatorType](https://developer.roblox.com/search#stq=ActuatorType) will attempt to achieve. Measured in studs/second.

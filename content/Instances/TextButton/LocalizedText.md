@@ -1,0 +1,7 @@
++++
+Target = "TextButton.LocalizedText"
+Type = string
+Tags = "Hidden, ReadOnly, NotReplicated"
++++
+
+This property sets whether a `TextButton` should be [GuiBase2d.Localize](https://developer.roblox.com/api-reference/property/GuiBase2d/Localize) or not.	This property sets whether a `TextButton` should be [GuiBase2d.Localize](https://developer.roblox.com/api-reference/property/GuiBase2d/Localize) or not.

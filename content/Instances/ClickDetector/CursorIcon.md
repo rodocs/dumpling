@@ -1,0 +1,6 @@
++++
+Target = "ClickDetector.CursorIcon"
+Type = string
++++
+
+Sets the mouse icon that will be displayed when the mouse is hovered over this ClickDetector.
