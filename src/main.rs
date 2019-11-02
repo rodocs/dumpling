@@ -85,6 +85,15 @@ fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
                                 .for_each(|(meta, param)| {
                                     param.description = Some(meta.description.to_string());
                                     param.description_source = Some(ContentSource::Supplemental);
+                                    if let Some(kind) = &meta.kind {
+                                        param.kind =
+                                            match dump_index.resolve_reference(&kind).expect(
+                                                "Invalid type in supplemental function parameter",
+                                            ) {
+                                                DumpReference::Type(dump_type) => dump_type,
+                                                DumpReference::Member(dump_type, _) => dump_type,
+                                            };
+                                    }
                                     if let Some(default) = &meta.default {
                                         param.default = Some(default.to_string());
                                     }

@@ -60,6 +60,8 @@ pub struct MetadataReturn {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct MetadataParameter {
+    #[serde(rename = "Type")]
+    pub kind: Option<String>,
     pub default: Option<String>,
     pub description: String,
 }
