@@ -181,6 +181,23 @@ fn load_combined_dump(
     dump
 }
 
+struct FullSiteOptions<'a> {
+    output_path: &'a Path,
+    dump_path: Option<&'a Path>,
+    metadata_path: Option<&'a Path>,
+    content_path: &'a Path,
+}
+
+fn full_site(options: &FullSiteOptions) {
+    let dump = load_combined_dump(
+        options.dump_path,
+        options.metadata_path,
+        options.content_path,
+    );
+
+    miniwiki::emit_full_site(&dump, &options.output_path);
+}
+
 struct MiniwikiOptions<'a> {
     output_path: &'a Path,
     dump_path: Option<&'a Path>,
@@ -257,6 +274,14 @@ fn main() {
                 .arg(output_arg.clone()),
         )
         .subcommand(
+            SubCommand::with_name("fullsite")
+                .about("Generate a simple, multi-page Roblox API site")
+                .arg(dump_arg.clone())
+                .arg(metadata_arg.clone())
+                .arg(content_arg.clone())
+                .arg(output_arg.clone()),
+        )
+        .subcommand(
             SubCommand::with_name("megadump")
                 .about("Create an API dump file with additional data")
                 .arg(dump_arg.clone())
@@ -289,6 +314,20 @@ fn main() {
             let content_path = Path::new(command_matches.value_of("content").unwrap());
 
             megadump(&MegadumpOptions {
+                output_path,
+                dump_path,
+                metadata_path,
+                content_path,
+            });
+        }
+        ("fullsite", command_matches) => {
+            let command_matches = command_matches.unwrap();
+            let output_path = Path::new(command_matches.value_of("output").unwrap());
+            let dump_path = command_matches.value_of("dump").map(Path::new);
+            let metadata_path = command_matches.value_of("metadata").map(Path::new);
+            let content_path = Path::new(command_matches.value_of("content").unwrap());
+
+            full_site(&FullSiteOptions {
                 output_path,
                 dump_path,
                 metadata_path,
