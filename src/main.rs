@@ -13,7 +13,7 @@ use std::{fs, path::Path};
 use clap::{App, Arg, SubCommand};
 
 use crate::{
-    dump::{ContentSource, Dump, DumpClassMember, DumpReturnType, DumpType},
+    dump::{ContentSource, Dump, DumpClassMember, DumpFunctionReturn, DumpIndex, DumpReference},
     dump_devhub::DevHubData,
     reflection_metadata::ReflectionMetadata,
     supplement::SupplementalData,
@@ -40,22 +40,8 @@ fn apply_reflection_metadata(dump: &mut Dump, metadata: &ReflectionMetadata) {
     }
 }
 
-fn simple_name_to_dump_type(name: &str) -> DumpType {
-    let mut n: &str = name;
-    let c = String::from(if name.starts_with("Enum.") {
-        n = &name[5..];
-        "Enum"
-    } else {
-        // TODO: Primitive, Class, and DataType. Also generic Group types. Not sure what to do with unique tables.
-        "TODO"
-    });
-    DumpType {
-        name: String::from(n),
-        category: c,
-    }
-}
-
 fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
+    let dump_index = DumpIndex::new_from_dump(dump);
     for class in dump.classes.iter_mut() {
         if let Some(description) = content.item_descriptions.get(&class.name) {
             class.description = Some(description.prose.clone());
@@ -72,13 +58,46 @@ fn apply_supplemental(dump: &mut Dump, content: &SupplementalData) {
                         function.description = Some(description.prose.clone());
                         function.description_source = Some(ContentSource::Supplemental);
 
-                        if let Some(type_names) = &description.metadata.return_types {
-                            function.return_type = DumpReturnType::Multiple(
-                                type_names
-                                    .iter()
-                                    .map(|simple_name| simple_name_to_dump_type(&simple_name))
-                                    .collect(),
-                            );
+                        if !description.metadata.returns.is_empty() {
+                            function.returns = description
+                                .metadata
+                                .returns
+                                .iter()
+                                .map(|ret| DumpFunctionReturn {
+                                    kind: match dump_index
+                                        .resolve_reference(&ret.kind)
+                                        .expect("Invalid type in supplemental return values")
+                                    {
+                                        DumpReference::Type(dump_type) => dump_type,
+                                        DumpReference::Member(dump_type, _) => dump_type,
+                                    },
+                                    description: Some(ret.description.to_string()),
+                                    description_source: Some(ContentSource::Supplemental),
+                                })
+                                .collect();
+                        }
+                        if !description.metadata.parameters.is_empty() {
+                            description
+                                .metadata
+                                .parameters
+                                .iter()
+                                .zip(function.parameters.iter_mut())
+                                .for_each(|(meta, param)| {
+                                    param.description = Some(meta.description.to_string());
+                                    param.description_source = Some(ContentSource::Supplemental);
+                                    if let Some(kind) = &meta.kind {
+                                        param.kind =
+                                            match dump_index.resolve_reference(&kind).expect(
+                                                "Invalid type in supplemental function parameter",
+                                            ) {
+                                                DumpReference::Type(dump_type) => dump_type,
+                                                DumpReference::Member(dump_type, _) => dump_type,
+                                            };
+                                    }
+                                    if let Some(default) = &meta.default {
+                                        param.default = Some(default.to_string());
+                                    }
+                                });
                         }
                     }
                 }
@@ -162,6 +181,23 @@ fn load_combined_dump(
     dump
 }
 
+struct FullSiteOptions<'a> {
+    output_path: &'a Path,
+    dump_path: Option<&'a Path>,
+    metadata_path: Option<&'a Path>,
+    content_path: &'a Path,
+}
+
+fn full_site(options: &FullSiteOptions) {
+    let dump = load_combined_dump(
+        options.dump_path,
+        options.metadata_path,
+        options.content_path,
+    );
+
+    miniwiki::emit_full_site(&dump, &options.output_path);
+}
+
 struct MiniwikiOptions<'a> {
     output_path: &'a Path,
     dump_path: Option<&'a Path>,
@@ -238,6 +274,14 @@ fn main() {
                 .arg(output_arg.clone()),
         )
         .subcommand(
+            SubCommand::with_name("fullsite")
+                .about("Generate a simple, multi-page Roblox API site")
+                .arg(dump_arg.clone())
+                .arg(metadata_arg.clone())
+                .arg(content_arg.clone())
+                .arg(output_arg.clone()),
+        )
+        .subcommand(
             SubCommand::with_name("megadump")
                 .about("Create an API dump file with additional data")
                 .arg(dump_arg.clone())
@@ -270,6 +314,20 @@ fn main() {
             let content_path = Path::new(command_matches.value_of("content").unwrap());
 
             megadump(&MegadumpOptions {
+                output_path,
+                dump_path,
+                metadata_path,
+                content_path,
+            });
+        }
+        ("fullsite", command_matches) => {
+            let command_matches = command_matches.unwrap();
+            let output_path = Path::new(command_matches.value_of("output").unwrap());
+            let dump_path = command_matches.value_of("dump").map(Path::new);
+            let metadata_path = command_matches.value_of("metadata").map(Path::new);
+            let content_path = Path::new(command_matches.value_of("content").unwrap());
+
+            full_site(&FullSiteOptions {
                 output_path,
                 dump_path,
                 metadata_path,

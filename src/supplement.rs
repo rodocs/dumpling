@@ -51,9 +51,29 @@ pub struct ItemDescription {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
+pub struct MetadataReturn {
+    #[serde(rename = "Type")]
+    pub kind: String,
+    pub description: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct MetadataParameter {
+    #[serde(rename = "Type")]
+    pub kind: Option<String>,
+    pub default: Option<String>,
+    pub description: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct Metadata {
     pub target: String,
-    pub return_types: Option<Vec<String>>,
+    #[serde(default)]
+    pub parameters: Vec<MetadataParameter>,
+    #[serde(default)]
+    pub returns: Vec<MetadataReturn>,
 }
 
 #[derive(Debug)]
